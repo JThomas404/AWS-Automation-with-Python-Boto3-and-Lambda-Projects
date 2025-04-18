@@ -4,7 +4,7 @@
 
 This project involves building a **serverless web application** for **ConnectingTheDots Corporation**, a company dedicated to advancing sustainable development through innovative training programs. The objective of this project is to create a serverless web application with an API backend that facilitates user interaction with training services, helping users access sustainability-focused resources.
 
-A few years ago, the founder (my mother) approached me to create a website for her. At that time, I built a simple static HTML website using WordPress. Recently, I decided to update the website by hosting a static site on AWS, which also provided an opportunity to improve my cloud engineering skills. This project has allowed me to develop practical experience with APIs, Python, Terraform, and more.
+A few years ago, the founder (my mother) approached me to create a website for her. At that time, I built a simple static HTML website using WordPress. Recently, I decided to update the website by hosting a static site on AWS, which also provided an opportunity to improve my cloud engineering skills. This project has allowed me to gain hands-on experience with APIs, Python, Terraform, and more.
 
 The web application will include the following features:
 - A **REST API** for managing user data and training program information.
@@ -23,7 +23,7 @@ The web application will include the following features:
 
 The core objectives of this project are:
 1. **API Development**: Learn how to design and deploy serverless REST APIs using **Flask** and **AWS Lambda**.
-2. **Serverless Architecture**: Utilize **AWS Lambda** and **API Gateway** to build a serverless backend, reducing infrastructure management complexity.
+2. **Serverless Architecture**: Utilise **AWS Lambda** and **API Gateway** to build a serverless backend, reducing infrastructure management complexity.
 3. **Infrastructure as Code (IaC)**: Implement **Terraform** for deploying cloud resources.
 4. **CI/CD Pipeline**: Build a **CI/CD pipeline** to automate deployments and testing.
 5. **Cloud Security and Best Practices**: Implement AWS best practices for security, monitoring, and performance.
@@ -38,7 +38,7 @@ The core objectives of this project are:
 
 ## Challenges Faced
 
-Building projects often comes with challenges, particularly when there is a steep learning curve. It's inevitable that something will go wrong, whether it's code not functioning as expected or issues with the API. These problems were essential in helping me grow as a cloud engineer. I have documented the significant issues I faced and how I resolved them in the [Challenges & Learnings](challenges-and-learnings.md) section of the repo.
+Building projects often comes with challenges, particularly when there is a steep learning curve. It's inevitable that something will go wrong, whether it's code not functioning as expected or issues with the API. These challenges were essential in helping me grow as a cloud engineer. I have documented the significant issues I faced and how I resolved them in the [Challenges & Learnings](challenges-and-learnings.md) section of the repo.
 
 ## Future Plans
 

@@ -1,9 +1,9 @@
 # Serverless Web Application Project Plan
 
 ## Overview
-This project involves creating a **serverless web application** using **Flask**, **AWS Lambda**, **API Gateway**, and **DynamoDB**. The project is designed to give you practical hands-on experience in deploying serverless solutions on AWS while working with technologies such as **Infrastructure as Code** (IaC), **CI/CD pipelines**, and **security best practices**.
+This project involves creating a **serverless web application** using **Flask**, **AWS Lambda**, **API Gateway**, and **DynamoDB**. It provides hands-on experience in deploying serverless solutions on AWS while working with technologies such as **Infrastructure as Code** (IaC), **CI/CD pipelines**, and **security best practices**.
 
-The goal of the project is to create a functional backend API that supports CRUD operations for user data and resources, along with a simple static frontend. This application will be entirely serverless, reducing management overhead and leveraging AWS's scalable and cost-efficient services.
+The objective is to build a functional backend API that supports CRUD operations for user data and resources, along with a static frontend. The application will be entirely serverless, minimising management overhead and leveraging AWS’s scalable, cost-effective services.
 
 ---
 ## Project Plan Diagram
@@ -16,22 +16,22 @@ The goal of the project is to create a functional backend API that supports CRUD
 
 ### Phase 1: Infrastructure Setup
 #### **Objective**:
-Set up the necessary AWS services to support the serverless application.
+Set up the necessary AWS services for the serverless application.
 
-Setting up **IAM roles** ensures proper access control and security by defining specific permissions for Lambda to interact with API Gateway and DynamoDB. **CloudFormation** or **Terraform** is used to define infrastructure in code, which promotes automation, consistency, and easy management of AWS resources. This also allows replication of the environment with minimal manual setup. **DynamoDB** provides a scalable, managed NoSQL database that can automatically adjust to growing data needs. **S3** is chosen for hosting the static frontend due to its cost-effectiveness and seamless integration with serverless applications, offering high durability and availability for static assets.
+This phase involves creating **IAM roles** to ensure proper access control and security, using **Infrastructure as Code (IaC)** with **CloudFormation** or **Terraform** for resource management, and setting up **DynamoDB** for data storage. **S3** will host the static frontend, providing high durability and availability.
 
 #### **Tasks**:
 1. **Create IAM Roles**:
-   - Set up AWS **IAM** roles with appropriate permissions for Lambda to interact with API Gateway and DynamoDB.
-   
-2. **Deploy Infrastructure using IaC (CloudFormation or Terraform)**:
-   - Define resources such as **API Gateway**, **Lambda Functions**, and **DynamoDB** in **Terraform** templates for automated deployment.
+   - Set up IAM roles with the required permissions for Lambda to interact with API Gateway and DynamoDB.
 
-3. **Set up DynamoDB**:
+2. **Deploy Infrastructure Using IaC**:
+   - Define infrastructure resources such as API Gateway, Lambda functions, and DynamoDB using **Terraform** templates for automated deployment.
+
+3. **Set Up DynamoDB**:
    - Create DynamoDB tables for storing user data, training resources, and progress tracking.
 
-4. **Set up S3 for Static Files**:
-   - Create an **S3 bucket** to host static files such as HTML, and CSS.
+4. **Set Up S3 for Static Files**:
+   - Create an S3 bucket for hosting static files such as HTML and CSS.
 
 #### **Deliverables**:
 - A Terraform template that defines the infrastructure resources (API Gateway, Lambda, DynamoDB).
@@ -40,95 +40,95 @@ Setting up **IAM roles** ensures proper access control and security by defining 
 
 ### Phase 2: Backend API with Flask
 #### **Objective**:
-Build the backend API using **Flask** and deploy it to **AWS Lambda**.
+Develop the backend API using **Flask** and deploy it to **AWS Lambda**.
 
-Flask is chosen for its lightweight, easy-to-learn nature, allowing for rapid API development. **AWS Lambda** removes the need for server management, scaling automatically in response to traffic. By using **API Gateway** to route requests to Lambda, I can efficiently expose the Flask application as a REST API. **DynamoDB** is used for CRUD operations as it offers a scalable, fully managed solution that integrates seamlessly with serverless applications, enabling fast data storage and retrieval.
+Flask is chosen for its lightweight nature, allowing for rapid development. **AWS Lambda** handles server management, automatically scaling based on demand. **API Gateway** routes HTTP requests to the Lambda functions, and **DynamoDB** will store and retrieve data.
 
 #### **Tasks**:
 1. **Create Flask Application**:
-   - Build a Flask application with **CRUD endpoints** (POST, GET, PUT, DELETE) for managing resources and user data.
+   - Develop a Flask app with CRUD endpoints (POST, GET, PUT, DELETE) for managing user data and resources.
 
 2. **Deploy Flask App to Lambda**:
-   - Use **AWS SAM (Serverless Application Model)** to deploy the Flask app to **AWS Lambda**.
+   - Use **AWS SAM (Serverless Application Model)** to deploy the Flask app to AWS Lambda.
 
-3. **Set up API Gateway**:
-   - Configure an **API Gateway** to route HTTP requests to the Lambda functions.
+3. **Set Up API Gateway**:
+   - Configure API Gateway to route HTTP requests to Lambda.
 
 4. **Connect Flask App to DynamoDB**:
-   - Implement logic to interact with **DynamoDB** for storing and retrieving data.
+   - Implement logic for interacting with DynamoDB to perform CRUD operations.
 
 #### **Deliverables**:
 - A fully functional Flask API deployed to AWS Lambda.
-- Configured API Gateway to route requests to the Lambda functions.
+- Configured API Gateway to route requests to Lambda functions.
 
 ---
 
-### Phase 3: Simple Frontend
+### Phase 3: Frontend
 #### **Objective**:
 Build a static frontend that interacts with the backend API.
 
-A static frontend using **HTML** and **CSS** is chosen to keep the project lightweight and easy to implement. This approach ensures that the focus remains on learning AWS serverless technologies while still providing the user with a fully functional web application. By using the **Fetch API**, the frontend can communicate directly with the backend API to manage user data. Hosting on **S3** allows for low-cost, high-durability static file storage and reduces the need for additional infrastructure.
+The frontend will be built using **HTML** and **CSS**, with JavaScript handling the interaction with the backend via the **Fetch API**. The static files will be hosted on **S3** for efficient, low-cost delivery.
 
 #### **Tasks**:
 1. **Create HTML and CSS**:
-   - Build the basic HTML structure and apply CSS for a simple, responsive design.
+   - Build the HTML structure and apply CSS for a responsive design.
 
-2. **Use JavaScript to Make API Calls**:
-   - Implement the **Fetch API** to send requests to the backend API for user interaction.
+2. **Use JavaScript for API Interaction**:
+   - Implement the Fetch API to interact with the backend API.
 
 3. **Host Frontend on S3**:
-   - Deploy static assets to **S3** for cost-efficient hosting.
+   - Deploy static files to an S3 bucket.
 
 #### **Deliverables**:
-- Static frontend files hosted on **S3**.
-- Simple forms and UI elements for interacting with the backend API.
+- Static frontend files hosted on S3.
+- Forms and UI elements for interacting with the backend API.
 
 ---
 
 ### Phase 4: CI/CD Pipeline
 #### **Objective**:
-Automate the deployment of both the frontend and backend using **GitHub Actions**.
+Automate deployment using **GitHub Actions**.
 
-Implementing a **CI/CD pipeline** is essential for automating testing, building, and deploying code, reducing human error, and accelerating the delivery of new features. **GitHub Actions** integrates seamlessly with AWS and automates the deployment of both the backend API (to Lambda) and the frontend (to S3). By using **unit tests**, I can ensure that the Lambda functions behave as expected, catching bugs early in the development process and improving code reliability.
+A **CI/CD pipeline** will be set up to automate testing, building, and deploying both the backend and frontend. **GitHub Actions** will be used to deploy the backend to AWS Lambda and the frontend to S3. Unit tests will ensure the Lambda functions are working as expected.
 
 #### **Tasks**:
-1. **Set up GitHub Actions**:
-   - Create a CI/CD pipeline with **GitHub Actions** to automatically test, build, and deploy the Flask app to AWS Lambda and static files to S3.
+1. **Set Up GitHub Actions**:
+   - Create a CI/CD pipeline to automatically test, build, and deploy the Flask app and frontend.
 
 2. **Write Unit Tests**:
-   - Write simple **unit tests** for Lambda functions to ensure they work as expected.
+   - Write unit tests for Lambda functions to validate their functionality.
 
 #### **Deliverables**:
-- A GitHub Actions pipeline for automated deployment of both frontend and backend.
-- Unit tests to validate Lambda functions.
+- A GitHub Actions pipeline for automated deployment.
+- Unit tests for Lambda functions.
 
 ---
 
-### Phase 5: Basic Security and Monitoring
+### Phase 5: Security and Monitoring
 #### **Objective**:
-Add basic security and monitoring features to the application.
+Implement security measures and monitoring for the application.
 
-Security is a crucial consideration even in simple applications. By using **API key-based authentication** in API Gateway, I can restrict access to the backend API, ensuring that only authorized users can interact with it. **CloudWatch** is set up to track the performance and logs of Lambda functions and API Gateway requests, providing insights into application performance and errors. These practices ensure that the application is secure, maintainable, and scalable.
+**API key-based authentication** will secure the API, restricting access to authorised users. **CloudWatch** will be used to track Lambda and API Gateway performance, ensuring the application runs efficiently and securely.
 
 #### **Tasks**:
 1. **API Key Authentication**:
-   - Implement **API key-based security** for API Gateway to restrict access to the backend API.
+   - Implement API key-based security for API Gateway to restrict access.
 
-2. **CloudWatch Logging and Monitoring**:
-   - Set up **CloudWatch Logs** to track Lambda function executions and API Gateway requests.
+2. **CloudWatch Monitoring**:
+   - Set up CloudWatch logs to monitor Lambda function executions and API Gateway requests.
 
 #### **Deliverables**:
 - API Gateway secured with API keys.
-- CloudWatch Logs for monitoring Lambda and API Gateway performance.
+- CloudWatch logs for monitoring performance.
 
 ---
 
 ## Key Learning Outcomes
-1. **Serverless Architecture**: Hands-on experience with **AWS Lambda**, **API Gateway**, and **DynamoDB**.
-2. **Infrastructure Automation**: Learning how to use **Terraform** for deploying AWS resources.
-3. **CI/CD Pipeline**: Implementing automated deployment and testing using **GitHub Actions**.
-4. **API Development**: Gain experience in building, deploying, and managing APIs using **Flask** and **AWS Lambda**.
-5. **Security and Monitoring**: Understanding the fundamentals of **security** and **monitoring** within a serverless application.
+1. **Serverless Architecture**: Practical experience with **AWS Lambda**, **API Gateway**, and **DynamoDB**.
+2. **Infrastructure Automation**: Learn to use **Terraform** to deploy AWS resources.
+3. **CI/CD Pipeline**: Automate deployment and testing using **GitHub Actions**.
+4. **API Development**: Gain experience in building and deploying APIs using **Flask** and **AWS Lambda**.
+5. **Security and Monitoring**: Understand security best practices and monitoring for serverless applications.
 
 ---
 
@@ -140,13 +140,12 @@ Security is a crucial consideration even in simple applications. By using **API 
 - **CloudFormation** or **Terraform** for infrastructure as code.
 - **GitHub Actions** for CI/CD.
 - **Flask** for the backend API.
-- **Zappa** or **AWS SAM** for deploying Flask to Lambda.
 
 ---
 
 ## Project Timeline
-- **Week 1**: Set up the infrastructure (Phase 1) and deploy the backend API (Phase 2).
+- **Week 1**: Set up infrastructure (Phase 1) and deploy the backend API (Phase 2).
 - **Week 2**: Build and deploy the static frontend (Phase 3), then set up CI/CD (Phase 4).
-- **Week 3**: Implement basic security (Phase 5) and complete documentation.
+- **Week 3**: Implement security (Phase 5) and complete documentation.
 
----
+--- 
