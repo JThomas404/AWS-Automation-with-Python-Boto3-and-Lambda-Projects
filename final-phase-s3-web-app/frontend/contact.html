@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - Connecting The Dots{% endblock %}
+
+{% block content %}
+    <h1>Contact Us</h1>
+    <p>If you have any questions or would like to get in touch, feel free to reach out through the information below or by submitting the form.</p>
+
+    <!-- Contact Form -->
+    <form action="{{ url_for('submit_contact') }}" method="POST">
+        <input type="text" name="first_name" placeholder="First Name" required>
+        <input type="text" name="last_name" placeholder="Last Name" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        <textarea name="message" placeholder="Your Message"></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Connecting The Dots Corporation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <h1>Dashboard</h1>
+    <p>Welcome to your training dashboard.</p>
+
+    <div id="data-container">
+        <p>Loading training data...</p>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('https://n1w5rf5o8i.execute-api.us-east-1.amazonaws.com/api/data')  <!-- Update API endpoint -->
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('data-container');
+                    container.innerHTML = '';
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'user-card';
+
+                            card.innerHTML = `
+                                <h3>${item.name || 'No Name Provided'}</h3>
+                                <p><strong>Username:</strong> ${item.username || 'N/A'}</p>
+                                <p><strong>Programme:</strong> ${item.programme || 'N/A'}</p>
+                                <p><strong>Progress:</strong> ${item.progress || '0%'}</p>
+                            `;
+
+                            container.appendChild(card);
+                        });
+                    } else {
+                        container.textContent = 'No training records found.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('data-container').textContent =
+                        'Sorry, there was a problem loading the data.';
+                });
+        });
+    </script>
+</body>
+</html>

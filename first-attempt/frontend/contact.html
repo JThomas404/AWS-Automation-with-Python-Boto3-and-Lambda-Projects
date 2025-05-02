@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Connecting The Dots Corporation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <section>
+        <h1>Contact Us</h1>
+        <p>If you have any questions or would like to get in touch, feel free to reach out through the information below or by submitting the form.</p>
+    </section>
+
+    <section>
+        <h2>Contact Information</h2>
+        <ul>
+            <li><strong>Email:</strong> <a href="mailto:info@connectingthedotscorporation.com">info@connectingthedotscorporation.com</a></li>
+            <li><strong>Phone:</strong> <a href="tel:+27832004192">+27 83 200 4192</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Send Us a Message</h2>
+        <form action="https://your-api-endpoint/submit_contact" method="POST"> <!-- Replace with correct API endpoint -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first-name">First Name*:</label>
+                    <input type="text" id="first-name" name="first_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last-name">Last Name*:</label>
+                    <input type="text" id="last-name" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="job-title">Job Title*:</label>
+                    <input type="text" id="job-title" name="job_title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+            </div>
+
+            <div class="form-row full-width">
+                <div class="form-group full-width">
+                    <label for="company">Company:</label>
+                    <input type="text" id="company" name="company">
+                </div>
+            </div>
+
+            <div class="form-row full-width">
+                <div class="form-group full-width">
+                    <label for="email">Email Address*:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+
+            <div class="form-row full-width">
+                <div class="form-group full-width">
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="form-row buttons">
+                <input type="submit" value="Send">
+                <input type="reset" value="Reset">
+            </div>
+        </form>
+    </section>  
+
+    <section>
+        <h2>Join Us in Shaping a Sustainable Future</h2>
+        <p>
+            Partner with ConnectingTheDots Corporation to enhance your understanding and implementation of sustainable practices.
+            Together, we can drive positive change and build a more sustainable world.
+        </p>
+    </section>
+</body>
+</html>

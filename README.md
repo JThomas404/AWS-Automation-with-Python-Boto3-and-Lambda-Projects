@@ -53,3 +53,12 @@ After completing the core features, I plan to:
 - **Website**: [www.connectingthedotscorporation.com](http://www.connectingthedotscorporation.com) (Website to be updated after project completion)
 
 ---
+
+
+* Add the references and guides i used in this project in a reference table
+Terraform registry: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+
+Python/Boto3/Flask: https://www.w3schools.com/python/default.asp; https://boto3.amazonaws.com/v1/documentation/api/latest/index.html; https://flask.palletsprojects.com/en/stable/
+
+HTML/CSS: https://www.w3schools.com/css/default.asp;https://www.w3schools.com/html/default.asp
+
