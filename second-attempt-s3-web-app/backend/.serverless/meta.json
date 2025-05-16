@@ -1,0 +1,283 @@
+{
+  "/Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/final-phase-s3-web-app/backend/serverless.yml": {
+    "versionFramework": "4.14.2",
+    "servicePath": "/Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/final-phase-s3-web-app/backend/serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "connecting-the-dots",
+      "provider": {
+        "name": "aws",
+        "runtime": "python3.13",
+        "stage": "dev",
+        "region": "us-east-1",
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "AppLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/connecting-the-dots-dev-app"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "connecting-the-dots",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/connecting-the-dots-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/connecting-the-dots-dev*:*:*"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "connecting-the-dots",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-f7d4e3eb-dfc8"
+            }
+          }
+        }
+      },
+      "functions": {
+        "app": {
+          "handler": "app.app",
+          "events": [
+            {
+              "http": {
+                "path": "/",
+                "method": "GET"
+              }
+            },
+            {
+              "http": {
+                "path": "contact",
+                "method": "GET"
+              }
+            },
+            {
+              "http": {
+                "path": "dashboard",
+                "method": "GET"
+              }
+            },
+            {
+              "http": {
+                "path": "submit_contact",
+                "method": "POST"
+              }
+            }
+          ],
+          "name": "connecting-the-dots-dev-app"
+        }
+      },
+      "plugins": [
+        "serverless-wsgi"
+      ],
+      "custom": {
+        "wsgi": {
+          "app": "app.app",
+          "pythonBin": "/Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/.venv/bin/python",
+          "packRequirements": true
+        }
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "python3.13",
+      "stage": "dev",
+      "region": "us-east-1",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "AppLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/connecting-the-dots-dev-app"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "connecting-the-dots",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/connecting-the-dots-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/connecting-the-dots-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "connecting-the-dots",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-f7d4e3eb-dfc8"
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "error": "Unable to run Python executable: /Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/.venv/bin/python. Use the \"pythonBin\" option to set your Python executable explicitly.",
+    "serviceRawFile": "service: connecting-the-dots\n\nprovider:\n  name: aws\n  runtime: python3.13  # Change to the correct Python version installed in the virtual environment\n\nfunctions:\n  app:\n    handler: app.app\n    events:\n      - http:\n          path: /\n          method: GET\n      - http:\n          path: contact\n          method: GET\n      - http:\n          path: dashboard\n          method: GET\n      - http:\n          path: submit_contact\n          method: POST\n\nplugins:\n  - serverless-wsgi\n\ncustom:\n  wsgi:\n    app: 'app.app'\n    pythonBin: '/Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/.venv/bin/python'\n    packRequirements: true",
+    "command": [
+      "deploy"
+    ],
+    "options": {
+      "debug": "*"
+    },
+    "orgId": "37e011a5-3f3d-469d-8262-8f37e9e73fe6",
+    "orgName": "jarredt",
+    "userId": "5WkPbN5S57P7jdK48C",
+    "userName": "jarredt",
+    "serviceProviderAwsAccountId": "533267010082",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}
