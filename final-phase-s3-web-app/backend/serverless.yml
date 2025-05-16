@@ -2,7 +2,8 @@ service: connecting-the-dots
 
 provider:
   name: aws
-  runtime: python3.13  # Change to the correct Python version installed in the virtual environment
+  runtime: python3.11
+  region: us-east-1
 
 functions:
   app:
@@ -15,17 +16,5 @@ functions:
           path: contact
           method: GET
       - http:
-          path: dashboard
-          method: GET
-      - http:
           path: submit_contact
           method: POST
-
-plugins:
-  - serverless-wsgi
-
-custom:
-  wsgi:
-    app: 'app.app'
-    pythonBin: '/Users/mac1/Desktop/aws_cloud/Cloud Projects/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/.venv/bin/python'
-    packRequirements: true

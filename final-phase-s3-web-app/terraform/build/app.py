@@ -10,6 +10,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     logger.info("Lambda event received: %s", json.dumps(event))
 
+    # Handle CORS preflight
     if event.get('httpMethod') == 'OPTIONS':
         return cors_response(200, "CORS preflight OK")
 
@@ -44,6 +45,7 @@ def handle_contact(event):
 
     logger.info("Parsed body: %s", json.dumps(body))
 
+    # Extract fields
     first_name = body.get("first_name")
     last_name = body.get("last_name")
     job_title = body.get("job_title")
@@ -51,10 +53,12 @@ def handle_contact(event):
     email = body.get("email")
     company = body.get("company")
 
+    # Validate required fields
     if not first_name or not last_name or not email:
         logger.warning("Missing required fields: first_name, last_name, email")
         return cors_response(400, {"error": "First name, last name, and email are required."})
 
+    # Log payload before writing to DynamoDB
     item = {
         "email": email,
         "first_name": first_name,
@@ -79,6 +83,7 @@ def handle_contact(event):
         return cors_response(500, {"error": "Failed to store contact data"})
 
 def handle_userdata_stub(event):
+    # Stub function since JWT is removed
     logger.info("handle_userdata called, but JWT removed. Returning dummy data.")
     return cors_response(200, {
         "first_name": "Test",

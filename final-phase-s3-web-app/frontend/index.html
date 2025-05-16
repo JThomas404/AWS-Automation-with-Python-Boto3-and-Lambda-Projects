@@ -1,14 +1,87 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en" class="loading">
+<head>
+  <meta charset="UTF-8">
+  <title>Connecting The Dots Corporation</title>
+  <meta name="color-scheme" content="dark">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link rel="prefetch" href="dashboard.html">
+  <link rel="prefetch" href="contact.html">
+</head>
+<body>
 
-{% block title %}Welcome to Connecting The Dots{% endblock %}
+  <!-- Background Video -->
+  <video autoplay muted loop playsinline id="background-video">
+    <source src="videos/body-background.mp4" type="video/mp4">
+  </video>
 
-{% block content %}
-    <h1>Welcome to Connecting The Dots Corporation</h1>
-    <p>Empowering sustainable change through innovative training solutions.</p>
+  <div class="video-overlay"></div>
 
-    <!-- API Health Status -->
-    <div id="api-health" class="api-health">API Health: Checking...</div>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-left">
+      <img src="images/CTDC.png" alt="CTD Logo" class="logo">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="nav-right" id="user-info" style="display:none;"></div>
+  </nav>
 
-    <!-- API Data (this will display data fetched from the backend) -->
-    <pre id="data" class="api-data">Loading data...</pre>
-{% endblock %}
+  <!-- Main Content -->
+  <main>
+    <h1>Welcome to Connecting The Dots Corporation</h1> 
+ 
+    <section>
+      <h2>Overview</h2>
+      <p>ConnectingTheDots Corporation is dedicated to advancing sustainable development through innovative training solutions...</p>
+    </section>
+
+    <section>
+      <h2>Mission Statement</h2>
+      <p>To empower individuals and organisations with transformative training programmes that promote sustainable development...</p>
+    </section>
+
+    <section>
+      <h2>Core Values</h2>
+      <ul>
+        <li><strong>Sustainability:</strong> Long-term planetary health.</li>
+        <li><strong>Innovation:</strong> Cutting-edge solutions for sustainability.</li>
+        <li><strong>Integrity:</strong> Upholding ethical conduct always.</li>
+        <li><strong>Collaboration:</strong> Working with partners for collective goals.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Services</h2>
+      <h3>Corporate Training Programmes</h3>
+      <ul>
+        <li>Customised sustainability workshops and seminars.</li>
+        <li>Leadership development for organisational change.</li>
+      </ul>
+
+      <h3>Educational Courses</h3>
+      <ul>
+        <li>Certification courses on sustainability topics.</li>
+        <li>Flexible online learning pathways.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    window.addEventListener('load', () => {
+      const userInfo = document.getElementById('user-info');
+      if (userInfo) {
+        userInfo.style.display = 'none';
+      }
+  
+      document.body.classList.remove('loading');
+    });
+  </script>
+  
+
+</body>
+</html>

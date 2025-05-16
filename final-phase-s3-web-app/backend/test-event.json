@@ -1,0 +1,8 @@
+{
+    "httpMethod": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"first_name\": \"Jarred\", \"last_name\": \"Thomas\", \"email\": \"jarred@example.com\", \"job_title\": \"Engineer\", \"phone_number\": \"1234567890\", \"company\": \"CTDC Corp\"}"
+  }
+  
