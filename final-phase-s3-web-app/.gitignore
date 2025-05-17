@@ -1,0 +1,10 @@
+*.DS_Store
+*.zip
+*.tfstate
+*.tfstate.backup
+*.log
+.terraform/
+.serverless/
+*.pyc
+__pycache__/
+
