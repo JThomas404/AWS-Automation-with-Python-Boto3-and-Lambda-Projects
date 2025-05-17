@@ -22,14 +22,14 @@ While the application functioned as expected, the architecture revealed several 
 
 ## Tech Stack
 
-| Category        | Technology             |
-|----------------|-------------------------|
-| Backend         | Python (Flask)         |
-| Database        | AWS DynamoDB           |
+| Category        | Technology                 |
+|----------------|-----------------------------|
+| Backend         | Python (Flask)             |
+| Database        | AWS DynamoDB               |
 | SDK             | Boto3 (AWS SDK for Python) |
-| Frontend        | HTML and CSS           |
-| Dev Environment | Python venv            |
-| Hosting         | None (localhost only)  |
+| Frontend        | HTML and CSS               |
+| Dev Environment | Python venv                |
+| Hosting         | None (localhost only)      |
 
 ---
 
@@ -37,14 +37,32 @@ While the application functioned as expected, the architecture revealed several 
 
 ```
 
-flask-localhost/
-├── app.py                  # Flask backend application
-├── requirements.txt        # Python dependencies
-├── templates/
-│   └── contact.html        # Contact form
-├── static/
-│   └── style.css           # Styling (optional)
-└── venv/                   # Virtual environment (excluded from Git)
+first-attempt-flask-web-app/
+├── backend/
+│   ├── app.py
+│   ├── lambda_function.zip
+│   ├── pre-signup.py
+│   ├── pre-signup.zip
+│   ├── requirements.txt
+│   └── scan_dynamodb.py
+
+├── frontend/
+│   ├── base.html
+│   ├── contact.html
+│   ├── dashboard.html
+│   ├── error.html
+│   ├── home.html
+│   ├── index.html
+│   └── style.css
+
+├── terraform/
+│   ├── .terraform.lock.hcl
+│   ├── lambda_function.zip
+│   ├── main.tf
+│   ├── outputs.tf
+│   ├── terraform.tfstate
+│   ├── terraform.tfstate.backup
+│   └── variables.tf
 
 ````
 
@@ -72,7 +90,7 @@ pip freeze > requirements.txt
 python app.py
 ```
 
-4. Access the form by navigating to:
+4. Access the form at:
 
 ```
 http://localhost:5000
@@ -125,59 +143,61 @@ if __name__ == '__main__':
   <button type="submit">Submit</button>
 </form>
 ```
+
+---
+
 ## Successful Contact Page
+
 ![Contact Us](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/contact-form-message.png)
+
 ---
 
 ## Testing and Validation
 
-* The Flask server was executed locally on `localhost:5000`
-* Manual form submissions were used to validate input handling
-* Submissions were verified in the DynamoDB console
-* Debugging was performed using `print()` statements and Flask's development server
+* The Flask server was run locally at `localhost:5000`
+* Manual submissions were used to test the form and validate backend handling
+* Form entries were confirmed in the AWS DynamoDB console
+* Debugging was performed using `print()` statements and Flask’s development server
 
 ![Form Items Saved 1](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-1.png)
 ![Form Items Saved 2](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-2.png)
-
 
 ---
 
 ## Limitations
 
-| Constraint                            | Impact                                                        |
-| ------------------------------------- | ------------------------------------------------------------- |
-| Flask server required local execution | Application unavailable unless manually started               |
-| No deployment pipeline                | Application was inaccessible to users outside the dev machine |
-| AWS credentials managed manually      | No secrets management or environment separation               |
-| No fault tolerance or scaling         | Application had no resilience or availability guarantees      |
+| Constraint                            | Impact                                               |
+| ------------------------------------- | ---------------------------------------------------- |
+| Flask server required local execution | Application was unavailable unless manually started  |
+| No deployment pipeline                | App was inaccessible outside the development machine |
+| AWS credentials managed manually      | No secrets management or environment isolation       |
+| No fault tolerance or scaling         | No resilience or availability guarantees             |
 
 ---
 
 ## Lessons and Takeaways
 
 * **Established Functional Workflow**
-  Implemented and validated a basic application pipeline from frontend form submission to backend processing and database storage. This confirmed my understanding of HTTP request handling, template rendering, and form parsing in Flask.
+  Confirmed the complete pipeline from frontend input to backend processing and database persistence. This validated my understanding of HTTP request handling, templating, and form logic in Flask.
 
 * **Hands-On Use of Boto3 and DynamoDB**
-  Gained practical experience with AWS Boto3 SDK, including resource initialisation, environment configuration, and interacting with DynamoDB tables using `put_item()`. Also learned about DynamoDB's schema-less nature and importance of designing a suitable partition key.
+  Gained practical experience using the Boto3 SDK for interacting with DynamoDB, including resource configuration and basic CRUD operations.
 
 * **Understood the Boundaries of Local-Only Applications**
-  Recognised that an application tied to a local server is inherently limited. There was no scalability, no reliability, and no accessibility beyond the development machine. This constraint rendered the architecture unsuitable for production use.
+  Realised that an application running only on `localhost` is inherently constrained and unfit for production environments.
 
 * **Identified the Need for Remote Hosting and Stateless Design**
-  This experience highlighted the necessity of decoupling the application from local infrastructure. It became clear that the next phase would require a serverless, cloud-native approach using AWS Lambda and API Gateway to allow the application to run independently of my machine.
+  This project demonstrated the need to separate application logic from the developer's environment, and to pursue serverless, event-driven infrastructure.
 
 * **Informed Strategic Decisions for Phase 2**
-  This phase clarified what needed to change going forward — namely, moving toward event-driven architecture, managed infrastructure, and deployment automation. The limitations observed here directly influenced the design of the second iteration.
+  These limitations shaped the architecture of the next phase — motivating a shift toward API Gateway, Lambda, and eventual Terraform-managed deployments.
 
 ---
 
 ## Transition to Next Phase
 
-While Phase 1 demonstrated working functionality, it fell short in terms of deployability, accessibility, and cloud readiness. These shortcomings drove the transition to a serverless model using Lambda, API Gateway, and the Serverless Framework.
+While Phase 1 validated core functionality, it fell short of being scalable, secure, or remotely deployable. These shortcomings ultimately led to Phase 2 — where the Flask app would be restructured and deployed to AWS Lambda using the Serverless Framework.
 
 [Continue to Phase 2 → Serverless Flask with WSGI](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/serverless-wsgi-flask.md)
-
-```
 
 ---

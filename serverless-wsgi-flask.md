@@ -2,21 +2,21 @@
 
 ## Project Summary
 
-This phase was the first attempt at transitioning the application from a local prototype to a remotely accessible, serverless architecture. Rather than rewriting the entire application from scratch, I opted to retain the Flask backend and integrate it into AWS Lambda using the Serverless Framework and the `serverless-wsgi` plugin.
+This phase marked the first attempt to transition the application from a local prototype to a remotely accessible, serverless architecture. Rather than rewriting the entire application from scratch, I chose to retain the Flask backend and integrate it with AWS Lambda using the Serverless Framework and the `serverless-wsgi` plugin.
 
-This approach allowed me to deploy the existing application while beginning to work with managed infrastructure such as API Gateway and Lambda. However, the method ultimately proved unstable, unscalable, and unnecessarily complex to maintain.
+This approach allowed me to deploy the existing application while beginning to work with managed services such as API Gateway and Lambda. However, the method ultimately proved unstable, unscalable, and unnecessarily complex to maintain.
 
 ---
 
 ## Overview
 
-The primary goal of this phase was to make the existing Flask application deployable and accessible via the web without running locally. The application flow remained the same:
+The primary goal of this phase was to make the existing Flask application deployable and accessible via the web without requiring local execution. The application logic remained the same:
 
 - Accept contact form submissions via HTML
-- Process the form using Flask
-- Store the data in DynamoDB using Boto3
+- Process the data with Flask
+- Store the submissions in DynamoDB using Boto3
 
-However, instead of executing on `localhost`, the application would now be hosted as a Lambda function, with API Gateway handling HTTP routing.
+Instead of running on `localhost`, the application would now execute as a Lambda function, with API Gateway handling HTTP routing.
 
 ---
 
@@ -39,16 +39,36 @@ However, instead of executing on `localhost`, the application would now be hoste
 
 ```
 
-serverless-wsgi-flask/
-├── app.py                    # Flask application
-├── requirements.txt          # Python dependencies
-├── serverless.yml            # Serverless Framework config
-├── wsgi\_handler.py           # WSGI handler adapter
-├── templates/
-│   └── contact.html
-├── static/
+second-attempt-s3-web-app/
+├── backend/
+│   ├── __pycache__/
+│   │   └── app.cpython-313.pyc
+│   ├── .serverless/
+│   │   └── meta.json
+│   ├── .venv/
+│   ├── node.modules/
+│   ├── .serverless-wsgi.txt
+│   ├── app.py
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── requirements.txt
+│   ├── serverless_wsgi.py
+│   ├── serverless.yml
+│   └── wsgi_handler.py
+
+├── frontend/
+│   ├── images/
+│   │   └── CTDC.png
+│   ├── base.html
+│   ├── contact.html
+│   ├── dashboard.html
+│   ├── index.html
 │   └── style.css
-└── venv/                     # Local virtual environment (excluded from Git)
+
+├── terraform/
+│   ├── main.tf
+│   ├── outputs.tf
+│   └── variables.tf
 
 ````
 
@@ -56,7 +76,7 @@ serverless-wsgi-flask/
 
 ## Setup and Deployment
 
-1. Install project dependencies into a virtual environment:
+1. Set up the Python environment and install dependencies:
 
 ```bash
 python3 -m venv venv
@@ -71,32 +91,32 @@ pip freeze > requirements.txt
 sls deploy
 ```
 
-3. After deployment, API Gateway will return an endpoint. Example:
+3. After deployment, API Gateway returns an endpoint. Example:
 
 ```
 https://<api-id>.execute-api.<region>.amazonaws.com/dev/contact
 ```
 
-4. Frontend form submissions would post directly to this endpoint.
+4. Frontend form submissions post directly to this endpoint.
 
 ---
 
 ## Validation and Testing
 
-To confirm that the Lambda function was correctly wired to DynamoDB via API Gateway, I tested POST requests using both **Postman** and **cURL**. The following tools allowed me to validate backend logic without relying on the frontend.
+To confirm the backend worked as expected, I tested POST requests using both Postman and cURL. These allowed me to validate API Gateway, Lambda, and DynamoDB interactions.
 
 ### Postman Test
 
-POST request to `/contact` with form-urlencoded data:
+POST request with `application/x-www-form-urlencoded`:
 
-* Name: Jarred
-* Email: [jarred@example.com](mailto:jarred@example.com)
-* Message: Testing Flask WSGI setup
+* **Name**: Jarred
+* **Email**: [jarred@example.com](mailto:jarred@example.com)
+* **Message**: Testing Flask WSGI setup
 
-**Result:**
+**Result**:
 
-* Status Code: 200
-* Response: `Submission successful`
+* Status Code: `200 OK`
+* Body: `Submission successful`
 
 ![Postman Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/postman.png)
 
@@ -110,8 +130,10 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/dev/contact \
   -d "name=Jarred&email=jarred@example.com&message=From cURL"
 ```
 
-**Result:**
-200 OK with confirmation that the data was written to DynamoDB.
+**Result**:
+
+* 200 OK
+* Data saved in DynamoDB
 
 ![Successful cURL](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/successful-curl.png)
 
@@ -119,7 +141,7 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/dev/contact \
 
 ### Lambda Welcome Message
 
-For GET requests or default route testing, the Lambda returned a simple welcome response to confirm routing was operational.
+For GET requests or route testing, Lambda returned a default welcome response:
 
 ![Welcome Message Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/welcome-message.png)
 
@@ -164,38 +186,38 @@ from wsgi import handler
 
 ## Observations and Issues
 
-| Problem                     | Description                                                                   |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| WSGI abstraction complexity | Errors were obscured by WSGI, making debugging Lambda logs time-consuming.    |
-| CORS issues persisted       | Preflight requests often failed. Manual header injection became unreliable.   |
-| Packaging overhead          | The zipped deployment became large and unstable due to dependency management. |
-| Fragile error handling      | Lambda error traces were buried or unhelpful in CloudWatch logs.              |
-| Inefficient workflow        | Every change required a repackage and redeploy cycle, slowing iteration.      |
+| Issue                       | Description                                                               |
+| --------------------------- | ------------------------------------------------------------------------- |
+| WSGI abstraction complexity | Obscured errors and made Lambda debugging tedious                         |
+| Persistent CORS issues      | Required manual header injection; OPTIONS handling was inconsistent       |
+| Packaging overhead          | Deployments were large due to dependency bundling and zipped environments |
+| Fragile error handling      | CloudWatch logs lacked clarity, hiding stack traces behind WSGI           |
+| Inefficient deployment loop | Required frequent repackaging and redeployments for small changes         |
 
 ---
 
 ## Lessons and Takeaways
 
 **Demonstrated End-to-End Serverless Deployment**
-Successfully deployed a functioning Flask application on AWS Lambda using API Gateway and the Serverless Framework. This confirmed my understanding of request routing, WSGI adaptation, and packaging Python workloads for Lambda.
+This was my first successful deployment of a Python Flask app using Lambda and API Gateway. It validated my knowledge of request routing, payload handling, and serverless packaging.
 
 **Exposed the Incompatibility Between WSGI and Lambda**
-While WSGI offers portability, its interaction with Lambda introduced a layer of indirection that made debugging and observability difficult. Lambda errors were often obscured by WSGI stack traces, making root-cause identification slow and imprecise.
+The complexity introduced by adapting Flask with WSGI ultimately hindered visibility and maintainability. Errors were deeply buried, and stack traces were obscured.
 
-**Reinforced the Importance of Clean API Design and CORS Management**
-This phase highlighted how essential it is to properly structure API Gateway resources and define consistent CORS headers across both preflight and actual responses.
+**Reinforced the Importance of CORS and Gateway Design**
+I learned that CORS is not just a frontend concern. It must be explicitly handled in both the Lambda response and API Gateway integration/method response configuration.
 
 **Identified the Need for AWS-Native Architecture**
-Retrofitting a Flask application into Lambda worked in theory but proved cumbersome in practice. It became clear that moving forward, the solution needed to be designed natively for AWS services — rather than adapting monolithic frameworks.
+Trying to make Flask serverless worked in theory, but not in practice. Native tools like Python-based Lambda functions, S3, and API Gateway offer better alignment with serverless paradigms.
 
-**Informed the Decision to Simplify the Stack Entirely**
-The cumulative issues with WSGI, Flask, and dependency management drove the decision to eliminate the Flask layer altogether. The next phase would instead separate the frontend and backend, use static S3 hosting for the UI, and a pure Python Lambda function for data handling.
+**Informed the Decision to Rebuild Simpler**
+This phase taught me that simplicity and native tooling often outperform adaptation. In the next phase, I removed Flask entirely and adopted a clean separation of frontend and backend using S3 and Lambda.
 
 ---
 
 ## Transition to Next Phase
 
-Although this phase delivered a deployed application, it became increasingly unstable and impractical to maintain. These architectural limitations led to a cleaner, AWS-native redesign in the next iteration — built around S3, CloudFront, API Gateway, and standalone Lambda functions without the WSGI or Flask layers.
+Although this phase achieved a working deployment, it was fragile and difficult to iterate on. These limitations drove the design of a more robust solution using AWS-native services for hosting, routing, and compute.
 
 [Continue to Phase 3 → Static Site (S3 + Lambda + API Gateway)](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app.md)
 

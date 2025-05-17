@@ -2,21 +2,21 @@
 
 ## Project Summary
 
-This phase marks the successful implementation of the web application. After two prior iterations — one tied to a local Flask server and another over-engineered using WSGI — I opted for a cloud-native architecture that separates concerns cleanly across the AWS stack. This version delivers a static frontend hosted on Amazon S3, served via CloudFront with HTTPS, and a backend API powered by Lambda and API Gateway.
+This phase marks the successful implementation of the web application. After two prior iterations — one tied to a local Flask server and another over-engineered using WSGI — I adopted an architecture that aligns with best practices for cloud engineering. This version cleanly separates concerns across the AWS stack: a static frontend hosted on Amazon S3 and distributed via CloudFront with HTTPS, and a backend API powered by Lambda and API Gateway.
 
-The infrastructure is fully managed through Terraform and structured to be scalable, modular, and ready for future integrations such as authentication via AWS Cognito.
+All infrastructure is managed using Terraform, structured to be scalable, modular, and ready for future integrations such as authentication via AWS Cognito.
 
 ---
 
 ## Overview
 
-The goals of this final version were:
+The goals of this final version were to:
 
-- Decouple frontend and backend to improve reliability and maintainability
-- Eliminate reliance on Flask and WSGI in favor of native AWS components
+- Decouple the frontend and backend to improve reliability and maintainability
+- Eliminate reliance on Flask and WSGI in favor of native AWS services
 - Provide a static, publicly accessible frontend with SSL and custom domain
 - Implement a backend capable of processing form submissions and writing to DynamoDB
-- Define the infrastructure as code using Terraform to ensure reproducibility and consistency
+- Define the infrastructure as code using Terraform for reproducibility and consistency
 
 ---
 
@@ -40,20 +40,42 @@ The goals of this final version were:
 
 final-phase-s3-web-app/
 ├── backend/
-│   └── app.py                  # Lambda function logic
+│   ├── .serverless/
+│   │   ├── cloudformation-template-update-stack.json
+│   │   ├── meta.json
+│   │   └── serverless-state.json
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── serverless.yml
+│   └── test-event.json
+
+├── .venv/
+
 ├── frontend/
-│   ├── index.html              # Home page
-│   ├── contact.html            # Contact form
-│   ├── dashboard.html          # (Future) Authenticated dashboard
-│   └── style.css               # Styling
+│   ├── images/
+│   │   ├── CTDC.png
+│   │   └── default-profile.png
+│   ├── videos/
+│   │   └── body-background.mp4
+│   ├── contact.html
+│   ├── dashboard.html
+│   ├── error.html
+│   ├── index.html
+│   └── style.css
+
 ├── terraform/
-│   ├── main.tf                 # Root module
-│   ├── api-gateway.tf          # API Gateway configuration
-│   ├── cloudfront.tf           # CloudFront and S3 hosting
-│   ├── lambda.tf               # Lambda + IAM
-│   ├── route53.tf              # DNS records
-│   └── variables.tf            # Input variables
-└── README.md                   # Primary documentation
+│   ├── build/
+│   │   └── app.py
+│   ├── .terraform.lock.hcl
+│   ├── api-gateway.tf
+│   ├── cloudfront.tf
+│   ├── cognito.tf
+│   ├── lambda.tf
+│   ├── main.tf
+│   ├── outputs.tf
+│   ├── route53.tf
+│   ├── terraform.tfvars
+│   └── variables.tf
 
 ````
 
@@ -63,9 +85,10 @@ final-phase-s3-web-app/
 
 **Prerequisites:**
 - AWS CLI and Terraform installed
-- Proper IAM credentials configured
+- IAM credentials with permissions to provision required resources
 
 1. **Initialise Terraform:**
+
 ```bash
 cd terraform
 terraform init
@@ -84,9 +107,9 @@ terraform apply
 aws s3 sync ../frontend s3://<your-static-site-bucket>
 ```
 
-4. **Verify CloudFront distribution and DNS propagation:**
+4. **Verify CloudFront distribution and DNS:**
 
-* Ensure HTTPS is active
+* Confirm HTTPS is enabled
 * Confirm site loads at: `https://www.connectingthedotscorp.com`
 
 ---
@@ -142,19 +165,15 @@ def lambda_handler(event, context):
 
 ## Validation and Testing
 
-Once deployed, I verified the contact form by navigating to the live site and submitting test data.
+### Step 1: Contact Page Form Submission
 
-### Step 1: Form Submission from Contact Page
-
-I completed the form on the live frontend and submitted it via the hosted `/contact` API Gateway endpoint. The UI returned the expected success message.
+Form was completed on the live frontend and submitted to the `/contact` API Gateway endpoint. The UI returned the expected success message.
 
 ![Form Submission - Part 1](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/form-submission-pt1.png)
 
----
+### Step 2: Network Tab Confirmation
 
-### Step 2: Inspect Element Network Tab Confirmation
-
-Using the browser's Developer Tools → Network tab, I confirmed that the request was sent successfully. The response returned a `200 OK` with no errors, verifying that Lambda, API Gateway, and DynamoDB integration was functioning correctly.
+Browser Developer Tools → Network tab confirmed a `200 OK` response with no errors, validating Lambda and API Gateway integration with DynamoDB.
 
 ![Form Submission - Part 2](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/form-submission-pt2.png)
 
@@ -162,39 +181,41 @@ Using the browser's Developer Tools → Network tab, I confirmed that the reques
 
 ## Features
 
-* Static site hosted securely on S3 and distributed globally via CloudFront
-* HTTPS and custom domain (`www.connectingthedotscorp.com`) using ACM
-* API Gateway exposed `/contact` and `/userdata` resources
-* Lambda handles backend logic and integrates with DynamoDB
-* Terraform-defined infrastructure across all layers
-* CORS headers properly configured for browser compatibility
-* Successful form submission triggers a success message and clears form state
+* Static frontend hosted securely on S3, served via CloudFront
+* HTTPS support and custom domain with ACM and Route 53
+* API Gateway exposes `/contact` and `/userdata` routes
+* Lambda function handles form processing and DynamoDB storage
+* Full infrastructure defined in modular, versioned Terraform code
+* CORS compliant and browser-tested endpoint integration
+* Client-side success messages and cleared form state
 
 ---
 
 ## Lessons and Takeaways
 
-**Cloud-Native Design Simplified Deployment and Debugging**
-By using S3, Lambda, and API Gateway directly, I eliminated unnecessary middleware and reduced failure points. Debugging, deployment, and scaling became easier and more predictable.
+**Native AWS Architecture Simplified Deployment and Debugging**
+By using S3, Lambda, and API Gateway directly, I eliminated unnecessary middleware and reduced complexity. Debugging and scaling became faster and more predictable.
 
-**Terraform Allowed Infrastructure Reusability and Consistency**
-Using Terraform for the entire project allowed consistent environment replication, version control, and streamlined change management.
+**Terraform Provided Reproducibility and Modularity**
+Terraform enabled structured and consistent infrastructure provisioning across all environments — with version control, visibility, and rollback safety.
 
-**Static Frontends + Dynamic APIs Are Powerful**
-Decoupling the frontend removed the need for Flask or a web server. This architecture allowed a truly serverless model — where compute only runs on-demand, and the frontend is globally cached.
+**Static Frontends Paired with Dynamic APIs Work at Scale**
+Separating the frontend removed the need for a web server. This serverless model runs compute only on-demand and leverages global CDN distribution.
 
-**CORS, HTTPS, and DNS Require Careful Integration**
-Ensuring clean cross-origin access, end-to-end encryption, and domain resolution highlighted the importance of low-level configuration in production systems.
+**CORS, DNS, and HTTPS Integration Require Careful Attention**
+I gained experience managing detailed configuration across multiple AWS services — ensuring secure, performant, and accessible endpoints.
 
-**This Architecture Scales Forward**
-The current build supports the planned integration of AWS Cognito for authentication, CloudWatch for monitoring, and S3 lifecycle rules for cost optimisation — without requiring structural changes.
+**Architecture Ready for Future Extensions**
+This version is future-proof. It can integrate authentication (Cognito), enhanced logging (CloudWatch), and automated cleanups (S3 lifecycle rules) without major refactors.
 
 ---
 
 ## Transition from Phase 2
 
-This phase resolved the core deployment and architectural issues experienced in both previous iterations. It delivered a scalable, cost-effective, and production-grade system built fully on AWS-native services. With this structure in place, the project is now prepared to support authentication, monitoring, and future extensibility.
+This version resolves the architectural and deployment challenges encountered in the previous two phases. It delivers a scalable, secure, and maintainable cloud application using fully managed AWS services.
 
-[Return to Project Overview](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/README.md)
+For a full breakdown of the challenges resolved and lessons learned, see:
+
+[Challenges and Learnings](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/challenges-and-learnings.md)
 
 ---
