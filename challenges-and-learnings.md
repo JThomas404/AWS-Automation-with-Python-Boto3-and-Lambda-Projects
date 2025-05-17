@@ -115,6 +115,8 @@ The WSGI abstraction layer created by `serverless-wsgi` made debugging fragile. 
 **Challenge:**
 Submitting a form from the frontend resulted in blocked preflight requests due to missing headers or unhandled `OPTIONS` requests.
 
+![Frontend Error](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/frontend.png)
+
 **Browser Console Error:**
 
 ```

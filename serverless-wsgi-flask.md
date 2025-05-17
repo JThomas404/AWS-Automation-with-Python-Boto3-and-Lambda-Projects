@@ -37,16 +37,20 @@ However, instead of executing on `localhost`, the application would now be hoste
 
 ## Folder Structure
 
+```
+
 serverless-wsgi-flask/
-├── app.py                    # Flask application  
-├── requirements.txt          # Python dependencies  
-├── serverless.yml            # Serverless Framework config  
-├── wsgi_handler.py           # WSGI handler adapter  
-├── templates/  
-│   └── contact.html  
-├── static/  
-│   └── style.css  
+├── app.py                    # Flask application
+├── requirements.txt          # Python dependencies
+├── serverless.yml            # Serverless Framework config
+├── wsgi\_handler.py           # WSGI handler adapter
+├── templates/
+│   └── contact.html
+├── static/
+│   └── style.css
 └── venv/                     # Local virtual environment (excluded from Git)
+
+````
 
 ---
 
@@ -74,6 +78,50 @@ https://<api-id>.execute-api.<region>.amazonaws.com/dev/contact
 ```
 
 4. Frontend form submissions would post directly to this endpoint.
+
+---
+
+## Validation and Testing
+
+To confirm that the Lambda function was correctly wired to DynamoDB via API Gateway, I tested POST requests using both **Postman** and **cURL**. The following tools allowed me to validate backend logic without relying on the frontend.
+
+### Postman Test
+
+POST request to `/contact` with form-urlencoded data:
+
+* Name: Jarred
+* Email: [jarred@example.com](mailto:jarred@example.com)
+* Message: Testing Flask WSGI setup
+
+**Result:**
+
+* Status Code: 200
+* Response: `Submission successful`
+
+![Postman Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/postman.png)
+
+---
+
+### cURL Test
+
+```bash
+curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/dev/contact \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "name=Jarred&email=jarred@example.com&message=From cURL"
+```
+
+**Result:**
+200 OK with confirmation that the data was written to DynamoDB.
+
+![Successful cURL](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/successful-curl.png)
+
+---
+
+### Lambda Welcome Message
+
+For GET requests or default route testing, the Lambda returned a simple welcome response to confirm routing was operational.
+
+![Welcome Message Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/welcome-message.png)
 
 ---
 
@@ -150,7 +198,5 @@ The cumulative issues with WSGI, Flask, and dependency management drove the deci
 Although this phase delivered a deployed application, it became increasingly unstable and impractical to maintain. These architectural limitations led to a cleaner, AWS-native redesign in the next iteration — built around S3, CloudFront, API Gateway, and standalone Lambda functions without the WSGI or Flask layers.
 
 [Continue to Phase 3 → Static Site (S3 + Lambda + API Gateway)](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app.md)
-
-```
 
 ---

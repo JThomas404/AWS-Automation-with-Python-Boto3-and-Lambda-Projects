@@ -125,7 +125,8 @@ if __name__ == '__main__':
   <button type="submit">Submit</button>
 </form>
 ```
-
+## Successful Contact Page
+![Contact Us](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/contact-form-message.png)
 ---
 
 ## Testing and Validation
@@ -134,6 +135,10 @@ if __name__ == '__main__':
 * Manual form submissions were used to validate input handling
 * Submissions were verified in the DynamoDB console
 * Debugging was performed using `print()` statements and Flask's development server
+
+![Form Items Saved 1](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-1.png)
+![Form Items Saved 2](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-2.png)
+
 
 ---
 
