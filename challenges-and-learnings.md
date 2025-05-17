@@ -1,407 +1,338 @@
-# Challenges and Learnings – ConnectingTheDots Project
+# Challenges and Learnings
 
-This document outlines key technical challenges encountered during the development and deployment of the serverless web application for ConnectingTheDots, along with solutions and insights gained at each phase.
+This document outlines the major technical and architectural challenges encountered throughout the development of the Serverless Web Application Project. Each challenge is explained with context, resolution steps, code and error references, and the lessons I have extracted from each relevant challenge.
 
 ---
 
-## Phase 1: Infrastructure Setup Challenges
+## Phase 1 – Flask (Localhost)
 
-### 🔍 S3 Public Access Denied
-- **Issue**: After deploying the infrastructure, accessing the static website via the S3 bucket returned "Access Denied" or XML-format errors.
-- **Root Cause**: AWS's default S3 security settings block public access unless explicitly allowed.
-- **Fix**: Public access was correctly enabled using Terraform configurations for access block overrides and a bucket policy:
+### 1. Application Runtime Bound to Localhost
 
-```hcl
-resource "aws_s3_bucket_public_access_block" "public-access" {
-  bucket                  = aws_s3_bucket.ctd-s3-bucket.id
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
+**Challenge:**  
+The Flask app was only available while the development server was manually running. Closing the terminal or breaking the session immediately made the application inaccessible.
 
-data "aws_iam_policy_document" "allow-public-access-on-bucket" {
-  statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.ctd-s3-bucket.arn}/*"]
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-  }
-}
+**Resulting Workflow:**
 
-resource "aws_s3_bucket_policy" "bucket-policy" {
-  bucket = aws_s3_bucket.ctd-s3-bucket.id
-  policy = data.aws_iam_policy_document.allow-public-access-on-bucket.json
+```bash
+$ python app.py
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+````
+
+No remote access. No resilience.
+
+**Learning:**
+This made it clear that I needed a cloud-deployable backend that could run independently of a developer session.
+
+---
+
+### 2. AWS Credential and Region Misconfiguration
+
+**Challenge:**
+The Flask app silently failed when attempting to write to DynamoDB because AWS credentials were not configured and the region was not explicitly passed.
+
+**Initial Code (bugged):**
+
+```python
+dynamodb = boto3.resource('dynamodb')
+```
+
+**Error (CloudWatch or CLI output):**
+
+```
+botocore.exceptions.NoRegionError: You must specify a region.
+```
+
+**Fix:**
+
+```python
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+```
+
+**Learning:**
+Boto3 requires explicit environment configuration — region, credentials, and IAM role alignment — especially in local testing.
+
+---
+
+### 3. Secrets Handled Insecurely
+
+**Challenge:**
+Temporary tests included hardcoded AWS credentials:
+
+```python
+aws_access_key_id = "AKIA..."
+aws_secret_access_key = "abc123..."
+```
+
+**Resolution:**
+Replaced with environment variable-based credential loading and ensured `.gitignore` excluded `.env`, `venv/`, and any credential artifacts.
+
+**Learning:**
+Security hygiene is not optional, even during prototyping. It is easy to accidentally commit sensitive information without proper version control practices.
+
+---
+
+## Phase 2 – Serverless Flask with WSGI
+
+### 1. Lambda + WSGI Obscured Errors
+
+**Challenge:**
+Once Flask was deployed via `serverless-wsgi`, Lambda returned only vague 502 errors for any internal exception.
+
+**API Response:**
+
+```
+502 Bad Gateway
+
+{"message": "Internal server error"}
+```
+
+**CloudWatch Logs:**
+
+```
+Unable to import module 'wsgi_handler': No module named 'flask'
+```
+
+or
+
+```
+Traceback (most recent call last):
+  ...
+  File "app.py", line 23, in contact
+    table.put_item(Item=data)
+botocore.exceptions.ParamValidationError: Parameter validation failed: ...
+```
+
+**Fix:**
+Wrapped all form parsing and DynamoDB logic in structured try/except with logging, but ultimately WSGI continued to mask stack traces.
+
+**Learning:**
+The WSGI abstraction layer created by `serverless-wsgi` made debugging fragile. It became a bottleneck for error traceability.
+
+---
+
+### 2. Broken CORS on Browser Submissions
+
+**Challenge:**
+Submitting a form from the frontend resulted in blocked preflight requests due to missing headers or unhandled `OPTIONS` requests.
+
+**Browser Console Error:**
+
+```
+Access to fetch at 'https://xyz.execute-api.amazonaws.com/dev/contact'
+from origin 'https://localhost' has been blocked by CORS policy.
+Response to preflight request doesn't pass access control check.
+```
+
+**Fix (in Flask):**
+
+```python
+response.headers.add("Access-Control-Allow-Origin", "*")
+response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+```
+
+**Fix (in serverless.yml):**
+
+```yaml
+functions:
+  app:
+    handler: wsgi_handler.handler
+    events:
+      - http:
+          path: /
+          method: options
+```
+
+**Learning:**
+CORS must be handled both in application responses and in API Gateway’s HTTP method configuration. Flask is not CORS-aware by default.
+
+---
+
+### 3. Packaging Errors and Size Bloat
+
+**Challenge:**
+Deploying the Flask app via Serverless often failed due to Python packaging errors or zip files exceeding Lambda size limits.
+
+**Error:**
+
+```
+An error occurred: Unzipped size must be smaller than 262144000 bytes
+```
+
+or
+
+```
+Unable to import module 'wsgi_handler': No module named 'flask'
+```
+
+**Cause:**
+The entire `venv` directory was being zipped along with the source, including unnecessary packages.
+
+**Fix:**
+Used the `serverless-python-requirements` plugin with proper exclusions and Docker packaging:
+
+```yaml
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+    slim: true
+    strip: false
+```
+
+**Learning:**
+Lambda functions must remain lightweight. Large deployments delay iteration and increase complexity unnecessarily.
+
+---
+
+## Phase 3 – Static Site (S3 + Lambda + API Gateway)
+
+### 1. API Gateway Returning CORS Errors Despite Lambda Headers
+
+**Challenge:**
+Even after adding correct CORS headers in the Lambda response, the browser still failed preflight checks.
+
+**Lambda Output:**
+
+```json
+"headers": {
+  "Access-Control-Allow-Origin": "*"
 }
 ```
 
-### 🧭 Missing Static Website Configuration
-- **Issue**: The static website did not render.
-- **Diagnosis**: The S3 bucket lacked the configuration for an index and error document.
-- **Fix**: Added a `website_configuration` block:
+**Browser Error:**
+
+```
+Response to preflight request does not include access-control-allow-origin header
+```
+
+**Fix (Terraform):**
 
 ```hcl
-resource "aws_s3_bucket_website_configuration" "ctd-website" {
-  bucket = aws_s3_bucket.ctd-s3-bucket.id
-
-  index_document {
-    suffix = "index.html"
+resource "aws_api_gateway_method_response" "cors" {
+  ...
+  response_models = {
+    "application/json" = "Empty"
   }
 
-  error_document {
-    key = "error.html"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
   }
 }
 ```
 
-### 🧾 IAM Role Failure
-- **Issue**: Lambda role creation failed in Terraform.
-- **Diagnosis**: Trust policy block syntax was invalid.
-- **Fix**: Used `jsonencode()` to dynamically encode a correct trust policy:
+**Learning:**
+Lambda alone is not responsible for CORS. The integration and method response layers in API Gateway must echo CORS headers explicitly.
+
+---
+
+### 2. SSL and DNS Misconfiguration
+
+**Challenge:**
+CloudFront served the wrong S3 distribution. Route 53 `A` records pointed to an incorrect CloudFront distribution, and ACM certificate validation failed.
+
+**Symptoms:**
+
+* `403 Forbidden` from CloudFront
+* No SSL lock on the domain
+* Certificate in ACM showed `Pending validation`
+
+**Fix:**
+
+* Updated Route 53 alias record to the correct CloudFront distribution
+* Added the missing `_acme-challenge` CNAME record to Route 53
+
+**Learning:**
+CloudFront, Route 53, and ACM must be precisely coordinated. Even minor mismatches in hosted zone records or distribution IDs can cause propagation or validation failure.
+
+---
+
+### 3. HTML Form Encoded Data Not Parsed
+
+**Challenge:**
+Lambda was expecting JSON, but the form submitted `application/x-www-form-urlencoded`, resulting in missing keys in the request body.
+
+**Buggy Lambda Code:**
+
+```python
+data = json.loads(event['body'])  # Fails on form-encoded input
+```
+
+**Fix:**
+
+```python
+import urllib.parse
+
+if headers.get("Content-Type", "").startswith("application/x-www-form-urlencoded"):
+    data = urllib.parse.parse_qs(event['body'])
+    data = {k: v[0] for k, v in data.items()}
+else:
+    data = json.loads(event['body'])
+```
+
+**Learning:**
+Lambda APIs must support multiple content types. Browsers still default to legacy formats in plain HTML forms. Supporting them improves compatibility and user experience.
+
+---
+
+### 4. S3 Permissions and CloudFront Integration
+
+**Challenge:**
+Static assets were uploaded to S3, but requests returned 403 errors when accessed via CloudFront.
+
+**Error:**
+
+```
+403 Forbidden - CloudFront cannot access the origin
+```
+
+**Root Cause:**
+The S3 bucket policy did not allow CloudFront (via OAC) to access the files.
+
+**Fix (Terraform):**
 
 ```hcl
-resource "aws_iam_role" "ctd-lambda" {
-  name = "ctd-lambda"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action    = "sts:AssumeRole",
-      Effect    = "Allow",
-      Principal = { Service = "lambda.amazonaws.com" }
-    }]
+resource "aws_s3_bucket_policy" "allow_cloudfront" {
+  policy = jsonencode({
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action = "s3:GetObject"
+        Resource = "arn:aws:s3:::bucket-name/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.main.arn
+          }
+        }
+      }
+    ]
   })
 }
 ```
 
-### 🌐 Bucket Name Conflict
-- **Issue**: Terraform errored due to an existing S3 bucket name.
-- **Diagnosis**: Bucket names must be globally unique.
-- **Fix**: Generated a unique suffix using the `random_id` resource:
-
-```hcl
-resource "random_id" "ctd-random-number" {
-  byte_length = 8
-}
-
-resource "aws_s3_bucket" "ctd-s3-bucket" {
-  bucket = "ctd-frontend-${random_id.ctd-random-number.hex}"
-}
-```
-
-### 🧪 No Outputs for Validation
-- **Issue**: Outputs like the S3 website URL were not retrievable.
-- **Fix**: Added an `outputs.tf` file:
-
-```hcl
-output "s3_website_url" {
-  description = "The URL of the S3-hosted website"
-  value       = aws_s3_bucket.ctd-s3-bucket.website_endpoint
-}
-```
+**Learning:**
+Secure S3 access via CloudFront requires correctly configured origin access control and matching bucket policies. Misalignment results in blocked content at the edge.
 
 ---
 
-## Phase 2: Backend API with Flask
+## Conclusion
 
-### 🕵️ Missing CloudWatch Logs
-- **Issue**: No logs were generated for the Lambda function.
-- **Diagnosis**: The IAM role lacked permission to publish logs.
-- **Fix**: Attached the basic logging policy and provisioned a CloudWatch log group:
+Each of these challenges forced me to stop, reassess, and understand the deeper mechanics of the AWS services I was using. These were not shallow bugs — they were foundational misunderstandings that had to be corrected through deliberate learning, reading documentation, debugging logs, and testing in isolation.
 
-```hcl
-resource "aws_iam_role_policy_attachment" "ctd-lambda-logs" {
-  role       = aws_iam_role.ctd-lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
+These experiences taught me to:
 
-resource "aws_cloudwatch_log_group" "lambda_logs" {
-  name              = "/aws/lambda/ctd-api"
-  retention_in_days = 7
-}
-```
+* Design for cloud-native environments instead of adapting server-based tools
+* Write secure, minimal, and content-aware Lambda functions
+* Configure and debug AWS infrastructure with precision using Terraform
+* Treat CORS, DNS, SSL, and IAM as core components — not afterthoughts
 
-### 📦 Lambda Packaging Errors
-- **Issue**: 500 errors occurred when triggering Lambda.
-- **Diagnosis**: Handler was misconfigured or the zip was incomplete.
-- **Fix**:
-  - Ensured `app.py` was at root.
-  - Installed all Python dependencies into `package/`.
-  - Zipped both together:
+Overcoming these problems did not just result in a working application. It gave me the confidence and experience to design, build, and maintain production-grade serverless architectures in AWS.
 
-```bash
-cd package
-zip -r9 ../lambda_function.zip .
-cd ..
-zip -g lambda_function.zip app.py
-```
-
-### 🧭 Deployment Path Errors
-- **Issue**: Terraform failed to locate the zip file.
-- **Diagnosis**: Wrong relative path.
-- **Fix**: Either moved the zip file to Terraform’s directory or updated the path in `main.tf`:
-
-```hcl
-filename         = "../lambda_function.zip"
-source_code_hash = filebase64sha256("../lambda_function.zip")
-```
-
----
-
-## Phase 3: Static Frontend Deployment
-
-### No Major Issues
-- Frontend files (`index.html`, `style.css`, `error.html`) were created and styled.
-- Files were uploaded using AWS CLI:
-
-```bash
-aws s3 cp frontend/ s3://ctd-frontend-[id]/ --recursive
-```
-
-### Validations
-- Website loaded from S3.
-- `/ping` confirmed backend was alive.
-- Error page displayed correctly for invalid URLs.
-
----
-
-# Phase 4 – Challenges & Learnings: Flask API Deployment with DynamoDB
-
-This phase was my most challenging, as I encountered errors with the lambda function and code not executing correctly to the api. I have documented my process of troubleshooting from debugging, restructuring, and re-deploying the Flask API to work with AWS Lambda and API Gateway.
-
----
-
-## Error Discovery & Debugging
-
-### Internal Server Error (500)
-- After initial deployment, all API routes returned a generic `{"message": "Internal Server Error"}`.
-- CloudWatch logs showed `TypeError` originating from `Mangum`, attempting to call Flask with ASGI-style arguments.
-
-### Incompatibility Identified
-- Flask is a WSGI-based framework and is not compatible with `Mangum`, which expects ASGI applications.
-- This fundamental incompatibility caused runtime errors.
-
-### Logging Issues
-- No logs were being generated in CloudWatch initially.
-- Solution:
-  - Added the managed `AWSLambdaBasicExecutionRole` to the Lambda IAM role.
-  - Explicitly created a log group `/aws/lambda/ctd-api` using Terraform to ensure proper logging.
-
----
-
-## Fixes & Rebuild
-
-### Switching from Mangum to Serverless-Wsgi
-- Removed `Mangum` from the project entirely.
-- Created a new file `wsgi_handler.py` with the following contents:
-
-```python
-from app import app
-from serverless_wsgi import handle_request
-
-def handler(event, context):
-    return handle_request(app, event, context)
-```
-
-- This approach is compatible with WSGI applications like Flask and bridges them to Lambda's event-driven model.
-
-### Cleaning & Rebuilding Deployment Package
-- Deleted outdated and duplicate files/directories:
-  - `lambda_function.zip`
-  - `deployment/`, `.DS_Store`, `venv/`, `__pycache__/`
-
-- Reinstalled dependencies into a fresh `package/` directory:
-
-```bash
-pip install flask boto3 serverless-wsgi -t package/
-```
-
-- Packaged application:
-  - Root:
-    - `wsgi_handler.py`
-    - `package/` directory containing all dependencies
-  - Zipped into `lambda_function.zip`
-
-### Terraform Updates
-- Updated Lambda function handler in `main.tf`:
-
-```hcl
-handler = "wsgi_handler.handler"
-```
-
-- Verified correct zip file path:
-
-```hcl
-filename         = "lambda_function.zip"
-source_code_hash = filebase64sha256("lambda_function.zip")
-```
-
-- Ensured IAM role had:
-  - `AWSLambdaBasicExecutionRole` for logging
-  - `AmazonDynamoDBReadOnlyAccess` for reading from the DynamoDB table
-
-### Redeployment
-- Re-applied the Terraform plan:
-
-```bash
-terraform apply
-```
-
-- Lambda deployed successfully
-- Connected to API Gateway via integration and route
-
----
-
-## Validation & Confirmation
-
-### API Tested Successfully
-- Accessed `/` endpoint via API Gateway
-- Received the expected response:
-
-```json
-{"message": "Welcome to ConnectingTheDots!"}
-```
-
-### CloudWatch Logs Verified
-- Logs successfully recorded request and response cycles
-
-**The successful response for documentation purposes**
-![api-welcome-message.png](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/welcome-message.png)
-
----
-
-## Phase 5: Frontend Setup with Flask
-
-### ❌ ModuleNotFoundError: No module named 'serverless_wsgi'
-
-- **Issue**: After setting up the initial Flask application and attempting to run the development server using `flask run`, the following error was encountered:
-
-```bash
-ModuleNotFoundError: No module named 'serverless_wsgi'
-```
-
-- **Cause**: The `serverless_wsgi` library was not installed in the local virtual environment. This module is essential to bridge Flask (a WSGI app) with AWS Lambda's event-based execution.
-
-- **Resolution**:
-  1. Activated the virtual environment:
-
-     ```bash
-     source .venv/bin/activate
-     ```
-
-  2. Installed the missing package:
-
-     ```bash
-     pip install serverless-wsgi
-     ```
-
-  3. Verified that the application now runs without error:
-
-     ```bash
-     flask run
-     ```
-
-- **Learning**: Always ensure all required packages are installed and available in the current virtual environment. This error reinforced the importance of managing dependencies correctly and checking for missing imports early in the setup process.
-
----
-
-## Phase 6: Contact Form Integration with DynamoDB
-
-This phase involved implementing a working contact form that captures user submissions from the frontend and stores them in DynamoDB via a Flask backend served through AWS Lambda.
-
----
-
-### Issue: `ResourceNotFoundException` – DynamoDB Table Not Found
-
-**Error Message:**
-```json
-{
-  "error": "An error occurred (ResourceNotFoundException) when calling the PutItem operation: Requested resource not found"
-}
-```
-
-**Cause:**
-The Lambda function was trying to write data to a non-existent or incorrectly named DynamoDB table. The backend code was pointing to:
-```python
-table = dynamodb.Table("ConnectingTheDotsContactTable")
-```
-…but the table created in Terraform was actually named:
-```hcl
-resource "aws_dynamodb_table" "ctd-db" {
-  name = "ConnectingTheDotsDBTable"
-}
-```
-
-**Fix:**
-Updated the Python Flask code to reference the correct table:
-```python
-table = dynamodb.Table("ConnectingTheDotsDBTable")
-```
-
----
-
-### Issue: Required Fields Validation Missing
-
-The form allowed empty submissions and returned vague backend responses.
-
-**Fix:**
-Implemented basic validation in the `/submit_contact` route:
-```python
-if not first_name or not last_name or not email:
-    return jsonify({"error": "Required fields are missing"}), 400
-```
-
----
-
-### Issue: IAM Role Lacked Write Access to DynamoDB
-
-**Symptoms:**
-The Lambda function had permission issues when writing to the table.
-
-**Fix:**
-Added this IAM policy attachment in `main.tf` to grant write access:
-```hcl
-resource "aws_iam_role_policy_attachment" "ctd-dynamodb-write" {
-  role       = aws_iam_role.ctd-lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
-}
-```
-
-> Note: This was granted for development. Consider using scoped-down permissions in production.
-
----
-
-### Issue: Repackaging and Deploying Lambda Zip Incorrectly
-
-**Problem:**
-After modifying the backend, the `lambda_function.zip` was not repackaged properly, resulting in outdated logic being deployed.
-
-**Fix:**
-Repackaged with updated dependencies and app files:
-
-```bash
-# Activate virtual environment
-source .venv/bin/activate
-
-# Reinstall necessary packages
-pip install flask boto3 serverless-wsgi -t package/
-
-# Package everything into a fresh ZIP
-cd package
-zip -r9 ../lambda_function.zip .
-cd ..
-zip -g lambda_function.zip app.py
-```
-
----
-
-### Verification
-
-- **Successful Form Submission**: Confirmed contact data written to DynamoDB.
-- **Test Screenshots**:
-  - ![contact-form-message.png](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/contact-form-message.png)
-  - ![form-items-saved-1.png](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/form-items-saved-1.png)
-  - ![form-items-saved-2.png](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/form-items-saved-2.png)
+This project became a lesson in engineering resilience — and in building systems that are not only functional, but sustainable.
 
 ---

@@ -815,5 +815,3 @@ By the end of Phase 6:
 This phase sets the foundation for future features such as user authentication, admin dashboards, or email automation.
 
 ---
-
-
