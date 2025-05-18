@@ -110,7 +110,7 @@ I am currently implementing Cognito authentication (email/password + Google logi
 ## Contact Information
 
 - **Email**: info@connectingthedotscorporation.com  
-- **Website**: [www.connectingthedotscorporation.com](https://www.connectingthedotscorporation.com)
+- **Website**: [www.connectingthedotscorporation.com](https://www.connectingthedotscorp.com)
 
 ---
 
