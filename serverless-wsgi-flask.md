@@ -118,7 +118,7 @@ POST request with `application/x-www-form-urlencoded`:
 * Status Code: `200 OK`
 * Body: `Submission successful`
 
-![Postman Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/postman.png)
+![Successful Postman](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/successful-curl.png)
 
 ---
 
@@ -129,19 +129,6 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/dev/contact \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "name=Jarred&email=jarred@example.com&message=From cURL"
 ```
-
-**Result**:
-
-* 200 OK
-* Data saved in DynamoDB
-
-![Successful cURL](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/successful-curl.png)
-
----
-
-### Lambda Welcome Message
-
-For GET requests or route testing, Lambda returned a default welcome response:
 
 ![Welcome Message Screenshot](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/images/welcome-message.png)
 
