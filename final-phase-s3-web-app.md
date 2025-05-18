@@ -44,12 +44,11 @@ final-phase-s3-web-app/
 │   │   ├── cloudformation-template-update-stack.json
 │   │   ├── meta.json
 │   │   └── serverless-state.json
+    ├── .venv/ 
 │   ├── app.py
 │   ├── requirements.txt
 │   ├── serverless.yml
 │   └── test-event.json
-
-├── .venv/
 
 ├── frontend/
 │   ├── images/
