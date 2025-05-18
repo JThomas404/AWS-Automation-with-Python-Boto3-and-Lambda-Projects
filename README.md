@@ -12,12 +12,12 @@ Live Site: [https://www.connectingthedotscorp.com](https://www.connectingthedots
 
 ## Project Structure
 
-Each attempt is represented by its own directory, each with dedicated documentation:
+Each attempt is represented by its own directory, accompanied by dedicated documentation:
 
-- [`flask-localhost/`](./flask-localhost) – First attempt (Flask app running locally)  
-- [`serverless-wsgi-flask/`](./serverless-wsgi-flask) – Second attempt (Flask deployed with WSGI, Lambda, API Gateway)  
-- [`final-phase-s3-web-app/`](./final-phase-s3-web-app) – Final and current implementation (S3 static site + API Gateway + Lambda)  
-- [`challenges-and-learnings.md`](./challenges-and-learnings.md) – Full documentation of errors, debugging sessions, and architectural revisions
+- [`first-attempt-flask-web-app/`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/first-attempt-flask-web-app) – Initial prototype (Flask app running locally on `localhost`)
+- [`second-attempt-s3-web-app/`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/second-attempt-s3-web-app) – Second iteration (Flask deployed with WSGI, Lambda, and API Gateway)
+- [`final-phase-s3-web-app/`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/final-phase-s3-web-app) – Final and current implementation (S3 static site with API Gateway and Lambda backend)
+- [`challenges-and-learnings.md`](./challenges-and-learnings.md) – Comprehensive documentation of issues encountered, debugging processes, and key architectural insights
 
 ---
 
@@ -25,7 +25,7 @@ Each attempt is represented by its own directory, each with dedicated documentat
 
 ### Phase 1 – Flask (Localhost)
 
-[Directory](./flask-localhost) | [Details](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/flask-localhost.md)
+[./flask-localhost directory](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/first-attempt-flask-web-app) | [flask-localhost.md](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/flask-localhost.md)
 
 This was the initial prototype: a web application built with Flask, running locally on `localhost`. It handled form submissions and stored data in DynamoDB using `boto3`.
 
@@ -35,7 +35,7 @@ Although functional, it lacked deployment capability. Since the Flask server had
 
 ### Phase 2 – Serverless Flask with WSGI and Boto3
 
-[Directory](./serverless-wsgi-flask) | [Details](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/serverless-wsgi-flask.md)
+[./serverless-wsgi-flask directory](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/second-attempt-s3-web-app) | [serverless-wsgi-flask.md](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/serverless-wsgi-flask.md)
 
 This version introduced serverless deployment using the `serverless-wsgi` plugin. It wrapped the Flask app for use with AWS Lambda and exposed it via API Gateway. The backend still used `boto3` to interact with DynamoDB.
 
@@ -45,7 +45,7 @@ While the theory made sense, real-world usage proved difficult. WSGI obscured La
 
 ### Phase 3 – Static Site (S3 + Lambda + API Gateway)
 
-[Directory](./final-phase-s3-web-app) | [Details](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app.md)
+[./final-phase-s3-web-app directory](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/final-phase-s3-web-app) | [final-phase-s3-web-app.md](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app.md)
 
 This is the final implementation — minimal, stable, and properly structured.
 
@@ -83,10 +83,7 @@ Validation of the deployed application included:
 
 ## Current Work in Progress
 
-I am currently implementing Cognito authentication (email/password + Google login), which is configured in:
-
-- [`cognito.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/cognito.tf)  
-- [`api-gateway.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/api-gateway.tf)
+I am currently implementing Cognito authentication (email/password + Google login), which is configured in [`cognito.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/cognito.tf) & [`api-gateway.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/api-gateway.tf)
 
 ---
 
