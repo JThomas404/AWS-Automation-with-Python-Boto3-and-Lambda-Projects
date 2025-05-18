@@ -83,7 +83,7 @@ Validation of the deployed application included:
 
 ## Current Work in Progress
 
-I am currently implementing Cognito authentication (email/password + Google login), which is configured in [`cognito.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/cognito.tf) & [`api-gateway.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/api-gateway.tf)
+I am currently implementing Cognito authentication (email/password + Google login), which is currently being configured in [`cognito.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/cognito.tf) & [`api-gateway.tf`](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/final-phase-s3-web-app/terraform/api-gateway.tf)
 
 ---
 
