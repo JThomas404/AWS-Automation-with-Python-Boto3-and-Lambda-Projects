@@ -129,4 +129,6 @@ This project was more than just technical execution — it was an exercise in pr
 
 I gained confidence in writing Terraform, troubleshooting Lambda and API Gateway integrations, configuring SSL and DNS, and building full-stack applications without traditional servers. More importantly, I learned how to approach problems with a practical, scalable mindset — not just to get things working, but to get them working well.
 
+[Continue to Phase 1 → Flask (Localhost)](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/flask-localhost.md)
+
 ---
