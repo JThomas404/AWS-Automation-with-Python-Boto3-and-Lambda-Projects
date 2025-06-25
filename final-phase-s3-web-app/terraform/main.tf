@@ -29,10 +29,10 @@ resource "aws_s3_bucket_website_configuration" "ctdc_site_config" {
 resource "aws_s3_bucket_public_access_block" "disable_block_public" {
   bucket = aws_s3_bucket.ctdc-s3-bucket.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_dynamodb_table" "ctdc-dynamodb" {
