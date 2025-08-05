@@ -1,2 +1,13 @@
+.history
 .DS_Store
-.history/
+*.log
+*.zip
+.gitattributes
+*.DS_Store
+*.zip
+*.tfstate
+*.tfstate.backup
+.terraform/
+.serverless/
+*.pyc
+__pycache__/

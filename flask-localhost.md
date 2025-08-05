@@ -1,203 +1,367 @@
-# Phase 1 – Flask (Localhost Prototype)
+# Phase 1: Flask Localhost Prototype
 
-## Project Summary
+A local Flask application demonstrating fundamental web development patterns and AWS service integration. This implementation established the foundational architecture for form processing and DynamoDB persistence, serving as the technical proof-of-concept for subsequent serverless iterations.
 
-This phase served as the initial prototype of the application. Its primary purpose was to establish the core functionality: capturing user input through a web form and storing it in AWS DynamoDB using Python Flask and Boto3. While limited in scalability and deployment scope, this phase was instrumental in laying the technical foundation for subsequent iterations.
+## Table of Contents
 
-Development and testing were performed entirely on `localhost`, with no remote deployment.
-
----
+- [Overview](#overview)
+- [Real-World Business Value](#real-world-business-value)
+- [Prerequisites](#prerequisites)
+- [Project Folder Structure](#project-folder-structure)
+- [Tasks and Implementation Steps](#tasks-and-implementation-steps)
+- [Core Implementation Breakdown](#core-implementation-breakdown)
+- [Local Testing and Debugging](#local-testing-and-debugging)
+- [Design Decisions and Highlights](#design-decisions-and-highlights)
+- [Errors Encountered and Resolved](#errors-encountered-and-resolved)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Conclusion](#conclusion)
 
 ## Overview
 
-The goal of this phase was to validate a basic full-stack workflow:
+This implementation demonstrates a traditional web application architecture using Flask for HTTP request handling and AWS DynamoDB for data persistence. The application provides a contact form interface with backend processing capabilities, establishing the core business logic that would later be adapted for serverless deployment.
 
-- Build a static HTML contact form
-- Capture form submissions via a Flask backend
-- Store the submitted data in a DynamoDB table using Boto3
+The architecture validates three critical components:
 
-While the application functioned as expected, the architecture revealed several fundamental limitations — particularly its reliance on a continuously running local server, absence of hosting, and lack of scalability or fault tolerance.
+1. **Frontend Interface**: HTML forms with proper field validation and user experience
+2. **Backend Processing**: Flask route handling with CORS configuration for API compatibility
+3. **Data Persistence**: DynamoDB integration using boto3 SDK for scalable storage
 
----
+This phase identified architectural constraints that informed the migration strategy toward serverless infrastructure in subsequent implementations.
 
-## Tech Stack
+## Real-World Business Value
 
-| Category        | Technology                 |
-|----------------|-----------------------------|
-| Backend         | Python (Flask)             |
-| Database        | AWS DynamoDB               |
-| SDK             | Boto3 (AWS SDK for Python) |
-| Frontend        | HTML and CSS               |
-| Dev Environment | Python venv                |
-| Hosting         | None (localhost only)      |
+This prototype delivered foundational business capabilities:
 
----
+- **Functional Validation**: Confirmed end-to-end workflow from user input to data storage
+- **Technology Assessment**: Evaluated Flask framework suitability for form processing requirements
+- **AWS Integration**: Established DynamoDB connectivity patterns for customer data management
+- **Development Velocity**: Rapid prototyping enabled quick iteration on user interface design
+- **Architecture Foundation**: Created reusable business logic for serverless migration
 
-## Folder Structure
+The implementation provided immediate value for local development and testing while revealing scalability limitations that drove architectural evolution.
+
+## Prerequisites
+
+- Python 3.8+
+- AWS CLI configured with DynamoDB access permissions
+- Virtual environment management (venv or virtualenv)
+- AWS DynamoDB table: `ConnectingTheDotsDBTable` (Phase 1 prototype table name)
+- Basic understanding of Flask framework and HTTP methods
+
+## Project Folder Structure
 
 ```
-
 first-attempt-flask-web-app/
-├── backend/
-│   ├── app.py
-│   ├── lambda_function.zip
-│   ├── pre-signup.py
-│   ├── pre-signup.zip
-│   ├── requirements.txt
-│   └── scan_dynamodb.py
-
-├── frontend/
-│   ├── base.html
-│   ├── contact.html
-│   ├── dashboard.html
-│   ├── error.html
-│   ├── home.html
-│   ├── index.html
-│   └── style.css
-
-├── terraform/
-│   ├── .terraform.lock.hcl
-│   ├── lambda_function.zip
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── terraform.tfstate
-│   ├── terraform.tfstate.backup
-│   └── variables.tf
-
-````
-
----
-
-## Setup and Installation
-
-1. Create and activate a Python virtual environment:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-````
-
-2. Install project dependencies:
-
-```bash
-pip install flask boto3
-pip freeze > requirements.txt
+├── backend/                              # Flask application and utilities
+│   ├── app.py                            # Main Flask application with CORS support
+│   ├── requirements.txt                  # Python dependencies
+│   ├── scan_dynamodb.py                  # DynamoDB data retrieval utility
+│   ├── pre-signup.py                     # User authentication logic
+│   └── *.zip                             # Lambda deployment packages
+├── frontend/                             # Static HTML templates and assets
+│   ├── index.html                        # Main landing page with API health checks
+│   ├── contact.html                      # Contact form with comprehensive fields
+│   ├── dashboard.html                    # User dashboard interface
+│   ├── base.html                         # Template inheritance base
+│   ├── error.html                        # Error handling page
+│   └── style.css                         # Responsive styling
+└── terraform/                            # Infrastructure as code (future migration)
+    ├── main.tf                           # Terraform configuration
+    ├── variables.tf                      # Environment variables
+    └── outputs.tf                        # Resource outputs
 ```
 
-3. Run the application:
+## Tasks and Implementation Steps
 
-```bash
-python app.py
-```
+### Phase 1: Development Environment Setup
 
-4. Access the form at:
+1. **Virtual Environment Configuration**: Isolated Python environment with dependency management
+2. **Flask Application Structure**: Modular application design with separation of concerns
+3. **AWS SDK Integration**: Boto3 configuration for DynamoDB connectivity
+4. **Frontend Development**: Responsive HTML forms with proper validation
 
-```
-http://localhost:5000
-```
+### Phase 2: Core Functionality Implementation
 
----
+1. **Route Handler Development**: Flask endpoints with HTTP method handling
+2. **CORS Configuration**: Cross-origin request support for API compatibility
+3. **Form Processing Logic**: Data validation and sanitisation procedures
+4. **Database Integration**: DynamoDB item creation and error handling
 
-## `app.py` — Core Flask Application Logic
+### Phase 3: Testing and Validation
+
+1. **Local Server Testing**: Manual form submission validation
+2. **Database Verification**: DynamoDB console confirmation of data persistence
+3. **API Health Monitoring**: Endpoint availability checking
+4. **Error Handling Validation**: Exception management and user feedback
+
+## Core Implementation Breakdown
+
+### Flask Application Architecture
+
+The production Flask application (`app.py`) implements professional development patterns:
 
 ```python
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, make_response
 import boto3
 
 app = Flask(__name__)
 
-# AWS DynamoDB configuration
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-table = dynamodb.Table('contact-submissions')
+# Health check with CORS headers for API compatibility
+@app.route("/ping")
+def ping():
+    response = make_response(jsonify({"status": "alive"}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
-@app.route('/', methods=['GET', 'POST'])
-def contact():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        message = request.form.get('message')
+# Contact form submission handler (commented for static site transition)
+# @app.route("/submit_contact", methods=["POST"])
+# def submit_contact():
+#     try:
+#         # Extract form data with validation
+#         first_name = request.form.get("first_name")
+#         last_name = request.form.get("last_name")
+#         email = request.form.get("email")
+#
+#         if not first_name or not last_name or not email:
+#             return jsonify({"error": "Required fields are missing"}), 400
+#
+#         # DynamoDB integration
+#         dynamodb = boto3.resource("dynamodb")
+#         table = dynamodb.Table("ConnectingTheDotsDBTable")
+#
+#         table.put_item(Item={
+#             "email": email,
+#             "first_name": first_name,
+#             "last_name": last_name,
+#             "job_title": request.form.get("job_title"),
+#             "phone_number": request.form.get("phone_number"),
+#             "company": request.form.get("company")
+#         })
+#
+#         return redirect("/contact")
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
-        # Store in DynamoDB
-        table.put_item(Item={
-            'email': email,
-            'name': name,
-            'message': message
-        })
-
-        return "Submission successful"
-    return render_template('contact.html')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
 ```
 
----
+### Frontend Implementation
 
-## `templates/contact.html` — Contact Form
+The contact form demonstrates comprehensive field validation and user experience design:
 
 ```html
-<form action="/" method="POST">
-  <input type="text" name="name" placeholder="Your Name" required />
-  <input type="email" name="email" placeholder="Your Email" required />
-  <textarea name="message" placeholder="Your Message" required></textarea>
-  <button type="submit">Submit</button>
+<form action="http://localhost:5000/submit_contact" method="POST">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="first-name">First Name*:</label>
+      <input type="text" id="first-name" name="first_name" required />
+    </div>
+    <div class="form-group">
+      <label for="last-name">Last Name*:</label>
+      <input type="text" id="last-name" name="last_name" required />
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="email">Email Address*:</label>
+      <input type="email" id="email" name="email" required />
+    </div>
+    <div class="form-group">
+      <label for="job-title">Job Title*:</label>
+      <input type="text" id="job-title" name="job_title" required />
+    </div>
+  </div>
+
+  <div class="form-row buttons">
+    <input type="submit" value="Send" />
+    <input type="reset" value="Reset" />
+  </div>
 </form>
 ```
 
----
+### API Health Monitoring
 
-## Successful Contact Page
+The Flask application provides a health check endpoint for development testing:
 
-![Contact Us](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/contact-form-message.png)
+```javascript
+// Local development health check
+async function checkAPIHealth() {
+  try {
+    const response = await fetch("http://localhost:5000/ping");
+    const data = await response.json();
+    document.getElementById(
+      "api-health"
+    ).innerText = `API Health: ${data.status}`;
+  } catch (error) {
+    document.getElementById("api-health").innerText = "API Health: Unavailable";
+  }
+}
+```
 
----
+## Local Testing and Debugging
 
-## Testing and Validation
+### Development Server Configuration
 
-* The Flask server was run locally at `localhost:5000`
-* Manual submissions were used to test the form and validate backend handling
-* Form entries were confirmed in the AWS DynamoDB console
-* Debugging was performed using `print()` statements and Flask’s development server
+Local testing utilised Flask's development server with debug mode enabled:
 
-![Form Items Saved 1](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-1.png)
-![Form Items Saved 2](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/raw/main/images/form-items-saved-2.png)
+```bash
+# Virtual environment setup
+python3 -m venv venv
+source venv/bin/activate
 
----
+# Dependency installation
+pip install Flask==2.0.1 Boto3>=1.18.0 Mangum==0.9.0
 
-## Limitations
+# Application startup
+python backend/app.py
+# * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+# * Debug mode: on
+```
 
-| Constraint                            | Impact                                               |
-| ------------------------------------- | ---------------------------------------------------- |
-| Flask server required local execution | Application was unavailable unless manually started  |
-| No deployment pipeline                | App was inaccessible outside the development machine |
-| AWS credentials managed manually      | No secrets management or environment isolation       |
-| No fault tolerance or scaling         | No resilience or availability guarantees             |
+### API Endpoint Validation
 
----
+Comprehensive testing using manual form submissions and health checks:
 
-## Lessons and Takeaways
+```bash
+# Test health endpoint
+curl http://localhost:5000/ping
+# Expected response: {"status": "alive"}
 
-* **Established Functional Workflow**
-  Confirmed the complete pipeline from frontend input to backend processing and database persistence. This validated my understanding of HTTP request handling, templating, and form logic in Flask.
+# Validate CORS headers for cross-origin requests
+curl -H "Origin: http://localhost:3000" \
+     -H "Access-Control-Request-Method: POST" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS http://localhost:5000/ping
+# Expected: CORS headers in response
+```
 
-* **Hands-On Use of Boto3 and DynamoDB**
-  Gained practical experience using the Boto3 SDK for interacting with DynamoDB, including resource configuration and basic CRUD operations.
+### DynamoDB Integration Testing
 
-* **Understood the Boundaries of Local-Only Applications**
-  Realised that an application running only on `localhost` is inherently constrained and unfit for production environments.
+Validated data persistence using AWS CLI and console verification:
 
-* **Identified the Need for Remote Hosting and Stateless Design**
-  This project demonstrated the need to separate application logic from the developer's environment, and to pursue serverless, event-driven infrastructure.
+```bash
+# Verify table structure
+aws dynamodb describe-table --table-name ConnectingTheDotsDBTable
 
-* **Informed Strategic Decisions for Phase 2**
-  These limitations shaped the architecture of the next phase — motivating a shift toward API Gateway, Lambda, and eventual Terraform-managed deployments.
+# Query submitted form data
+aws dynamodb scan --table-name ConnectingTheDotsDBTable --region us-east-1
 
----
+# Check specific item by email
+aws dynamodb get-item --table-name ConnectingTheDotsDBTable \
+  --key '{"email":{"S":"john.doe@example.com"}}'
+```
 
-## Transition to Next Phase
+### Frontend Functionality Verification
 
-While Phase 1 validated core functionality, it fell short of being scalable, secure, or remotely deployable. These shortcomings ultimately led to Phase 2 — where the Flask app would be restructured and deployed to AWS Lambda using the Serverless Framework.
+Browser-based testing confirmed form submission workflow and error handling:
 
-[Continue to Phase 2 → Serverless Flask with WSGI](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/blob/main/serverless-wsgi-flask.md)
+![Contact Form Interface](images/contact-form-message.png)
 
----
+![DynamoDB Data Persistence](images/form-items-saved-1.png)
+![Database Console Verification](images/form-items-saved-2.png)
+
+## Design Decisions and Highlights
+
+### Architecture Pattern Selection
+
+**Traditional MVC over Single-Page Application:**
+
+- **Decision**: Implement server-side rendering with Flask templates
+- **Rationale**: Rapid prototyping requirements and familiar development patterns
+- **Trade-off**: Limited client-side interactivity but faster initial development
+
+**DynamoDB over Relational Database:**
+
+- **Decision**: NoSQL database for contact form storage
+- **Rationale**: Simplified schema management and AWS service integration
+- **Benefit**: Serverless-compatible data layer for future migration
+
+**CORS Implementation Strategy:**
+
+- **Decision**: Explicit CORS headers in Flask responses
+- **Rationale**: Prepare for API-driven architecture in subsequent phases
+- **Implementation**: Manual header configuration for cross-origin compatibility
+
+### Development Practices
+
+**Virtual Environment Isolation:**
+
+- Dependency management with requirements.txt versioning
+- Flask 2.0.1 with boto3 >= 1.18.0 for AWS SDK compatibility
+- Mangum integration for future Lambda deployment preparation
+
+**Error Handling Strategy:**
+
+- Try-catch blocks for DynamoDB operations
+- JSON error responses with appropriate HTTP status codes
+- Form validation with required field enforcement
+
+## Errors Encountered and Resolved
+
+### AWS Credential Configuration Issues
+
+**Problem**: DynamoDB connection failures during local development
+**Root Cause**: Missing AWS region configuration and credential setup
+**Resolution**: Implemented explicit region specification and AWS CLI profile configuration
+**Learning**: Local development requires proper AWS credential management even for prototype phases
+
+### CORS Preflight Request Handling
+
+**Problem**: Browser blocking form submissions due to CORS policy violations
+**Root Cause**: Missing OPTIONS method handling and proper CORS headers
+**Resolution**: Added comprehensive CORS header configuration to all responses
+**Impact**: Enabled frontend-backend communication for API testing
+
+### Form Data Processing Inconsistencies
+
+**Problem**: Inconsistent form field extraction and validation
+**Root Cause**: Missing null checks and improper error handling
+**Resolution**: Implemented comprehensive form validation with required field checking
+**Prevention**: Added structured error responses for client-side handling
+
+## Skills Demonstrated
+
+### Web Development Fundamentals
+
+- **Flask Framework**: Route handling, template rendering, and HTTP method processing
+- **HTML/CSS**: Responsive form design with proper semantic markup
+- **JavaScript**: Asynchronous API communication and DOM manipulation
+- **HTTP Protocol**: Understanding of request/response cycles and status codes
+
+### AWS Cloud Integration
+
+- **DynamoDB**: NoSQL database operations using boto3 SDK
+- **IAM**: AWS credential management and service permissions
+- **SDK Usage**: Python boto3 resource and client patterns
+
+### Development Best Practices
+
+- **Virtual Environments**: Dependency isolation and version management
+- **Error Handling**: Exception management and user feedback
+- **Code Organization**: Modular application structure with separation of concerns
+- **Testing Strategy**: Manual validation and console verification procedures
+
+### Problem-Solving and Architecture
+
+- **Constraint Identification**: Recognition of localhost limitations for production deployment
+- **Migration Planning**: Architectural decisions that facilitate serverless transition
+- **Documentation**: Comprehensive recording of implementation decisions and challenges
+
+## Conclusion
+
+This implementation successfully validated the core business logic and established foundational patterns for form processing and data persistence. The Flask prototype demonstrated essential web development capabilities while revealing architectural constraints that informed the migration strategy toward serverless infrastructure.
+
+The comprehensive form handling, CORS configuration, and DynamoDB integration provided reusable components for subsequent phases. Most importantly, the limitations identified during local development - including scalability constraints, deployment complexity, and availability requirements - drove the architectural evolution toward API Gateway and Lambda functions.
+
+The systematic documentation of challenges and solutions established a knowledge base that accelerated development in later phases, demonstrating the value of thorough prototyping in complex system design.
+
+**Key Repository Links:**
+
+- [Flask Application Code](first-attempt-flask-web-app/backend/)
+- [Frontend Templates](first-attempt-flask-web-app/frontend/)
+- [Phase 2 Implementation](second-attempt-s3-web-app/)
+- [Detailed Technical Challenges](challenges-and-learnings.md)
