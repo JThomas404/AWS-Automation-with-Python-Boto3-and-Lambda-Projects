@@ -24,6 +24,7 @@ A production-ready serverless web application demonstrating cloud-native archite
 This project implements a serverless contact form application using AWS cloud services, demonstrating the evolution from a local Flask prototype to a production-ready static site with API-driven backend. The architecture leverages S3 for static hosting, CloudFront for content delivery, API Gateway for request routing, Lambda for serverless compute, and DynamoDB for data persistence.
 
 The implementation showcases three distinct architectural approaches:
+
 1. **Phase 1**: Flask application running on localhost with DynamoDB integration
 2. **Phase 2**: Serverless Flask deployment using WSGI adapter with Lambda and API Gateway
 3. **Phase 3**: Decoupled static frontend with dedicated Lambda backend (current production implementation)
@@ -86,12 +87,14 @@ AWS-Automation-with-Python-Boto3-and-Lambda-Projects/
 ## Tasks and Implementation Steps
 
 ### Phase 1: Local Prototype Development
+
 1. **Flask Application Setup**: Created basic web server with form handling capabilities
 2. **DynamoDB Integration**: Implemented boto3 client for data persistence
 3. **Local Testing**: Validated form submissions and database writes on localhost
 4. **Limitation Identification**: Recognised scalability constraints of local deployment
 
 ### Phase 2: Serverless Migration Attempt
+
 1. **WSGI Adapter Implementation**: Wrapped Flask app for Lambda compatibility
 2. **Serverless Framework Configuration**: Defined deployment pipeline and API Gateway integration
 3. **CORS Configuration**: Addressed cross-origin request handling
@@ -99,6 +102,7 @@ AWS-Automation-with-Python-Boto3-and-Lambda-Projects/
 5. **Architecture Reassessment**: Identified maintainability concerns with WSGI approach
 
 ### Phase 3: Production Architecture Implementation
+
 1. **Infrastructure Design**: Architected decoupled static frontend with API backend
 2. **Terraform Configuration**: Implemented infrastructure as code for all AWS resources
 3. **Static Site Deployment**: Configured S3 hosting with CloudFront distribution
@@ -158,6 +162,7 @@ def handle_contact(event):
 The Terraform configuration demonstrates modular resource management:
 
 **S3 and CloudFront Configuration (main.tf and cloudfront.tf):**
+
 ```hcl
 resource "aws_s3_bucket" "ctdc-s3-bucket" {
   bucket = "connectingthedots-${random_id.ctdc-random-number.hex}"
@@ -177,7 +182,7 @@ resource "aws_cloudfront_distribution" "ctdc-distribution" {
     origin_id                = "ctdc-s3-origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.ctdc-oac.id
   }
-  
+
   default_cache_behavior {
     target_origin_id       = "ctdc-s3-origin"
     viewer_protocol_policy = "redirect-to-https"
@@ -187,6 +192,7 @@ resource "aws_cloudfront_distribution" "ctdc-distribution" {
 ```
 
 **API Gateway with CORS (api-gateway.tf):**
+
 ```hcl
 resource "aws_api_gateway_rest_api" "ctdc-api" {
   name        = "ctdc-api"
@@ -214,44 +220,48 @@ The static frontend (`frontend/index.html`) provides a professional corporate we
 ```html
 <!DOCTYPE html>
 <html lang="en" class="loading">
-<head>
-  <meta charset="UTF-8">
-  <title>Connecting The Dots Corporation</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- Background Video -->
-  <video autoplay muted loop playsinline id="background-video">
-    <source src="videos/body-background.mp4" type="video/mp4">
-  </video>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Connecting The Dots Corporation</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Background Video -->
+    <video autoplay muted loop playsinline id="background-video">
+      <source src="videos/body-background.mp4" type="video/mp4" />
+    </video>
 
-  <!-- Navigation -->
-  <nav>
-    <div class="nav-left">
-      <img src="images/CTDC.png" alt="CTD Logo" class="logo">
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="contact.html">Contact</a>
+    <!-- Navigation -->
+    <nav>
+      <div class="nav-left">
+        <img src="images/CTDC.png" alt="CTD Logo" class="logo" />
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="contact.html">Contact</a>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <!-- Main Content -->
-  <main>
-    <h1>Welcome to Connecting The Dots Corporation</h1>
-    <section>
-      <h2>Mission Statement</h2>
-      <p>To empower individuals and organisations with transformative training programmes...</p>
-    </section>
-  </main>
-</body>
+    <!-- Main Content -->
+    <main>
+      <h1>Welcome to Connecting The Dots Corporation</h1>
+      <section>
+        <h2>Mission Statement</h2>
+        <p>
+          To empower individuals and organisations with transformative training
+          programmes...
+        </p>
+      </section>
+    </main>
+  </body>
 </html>
 ```
 
 ## Local Testing and Debugging
 
 ### Lambda Function Testing
+
 Local testing utilised direct Python execution and Serverless Framework:
 
 ```bash
@@ -269,6 +279,7 @@ terraform apply
 ```
 
 ### API Endpoint Validation
+
 Comprehensive testing using cURL and browser developer tools:
 
 ```bash
@@ -287,6 +298,7 @@ curl -X OPTIONS https://api.connectingthedotscorp.com/prod/contact \
 ```
 
 ### DynamoDB Data Verification
+
 Validated data persistence using AWS CLI:
 
 ```bash
@@ -377,11 +389,13 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 ### Architecture Evolution Rationale
 
 **Phase 1 to Phase 2 Migration:**
+
 - **Decision**: Migrate from localhost Flask to serverless deployment
 - **Rationale**: Eliminate infrastructure management overhead and enable 24/7 availability
 - **Trade-off**: Increased complexity in debugging and deployment pipeline
 
 **Phase 2 to Phase 3 Redesign:**
+
 - **Decision**: Abandon WSGI wrapper in favour of dedicated Lambda functions
 - **Rationale**: WSGI abstraction obscured error handling and limited observability
 - **Benefit**: Clear separation of concerns, improved debugging, and better performance
@@ -389,16 +403,19 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 ### Technology Stack Choices
 
 **Static Site Generation over Server-Side Rendering:**
+
 - **Decision**: Host frontend as static files on S3 rather than dynamic Flask templates
 - **Rationale**: Improved performance, reduced complexity, and better caching capabilities
 - **Implementation**: CloudFront CDN with global edge locations for optimal load times
 
 **DynamoDB over RDS:**
+
 - **Decision**: NoSQL database for form submission storage
 - **Rationale**: Serverless scaling, pay-per-request pricing, and simplified schema management
 - **Trade-off**: Limited query flexibility compared to relational databases
 
 **Terraform over CloudFormation:**
+
 - **Decision**: HashiCorp Terraform for infrastructure provisioning
 - **Rationale**: Multi-cloud compatibility, superior state management, and extensive provider ecosystem
 - **Benefit**: Declarative configuration with plan/apply workflow for change validation
@@ -406,16 +423,19 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 ### Security Implementation
 
 **HTTPS Enforcement:**
+
 - CloudFront configured to redirect HTTP to HTTPS
 - ACM certificate with automatic renewal
 - HSTS headers for browser security
 
 **CORS Configuration:**
+
 - Explicit origin whitelisting for production domain
 - Preflight request handling for complex requests
 - Method and header restrictions to prevent unauthorised access
 
 **IAM Security Considerations:**
+
 - Current implementation uses managed policies for rapid prototyping
 - AdministratorAccess provides broad permissions beyond application requirements
 - Production environments should implement custom policies restricting access to specific DynamoDB tables and CloudWatch log groups
@@ -425,34 +445,47 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 ### Critical CORS Configuration Issues
 
 **Problem**: Browser requests blocked despite Lambda returning correct headers
+
 **Root Cause**: API Gateway method responses not configured for CORS
+
 **Resolution**: Implemented both Lambda response headers and API Gateway method response configuration
+
 **Learning**: CORS requires coordination between multiple AWS service layers
 
 ### CloudFront Origin Access Control
 
 **Problem**: 403 Forbidden errors when accessing S3 content through CloudFront
+
 **Root Cause**: Missing Origin Access Control configuration and S3 bucket policy
+
 **Resolution**: Created OAC resource and corresponding S3 bucket policy with CloudFront service principal
+
 **Impact**: Secured direct S3 access while maintaining CloudFront functionality
 
 ### Lambda Package Size Limitations
 
 **Problem**: Deployment failures due to oversized Lambda packages
+
 **Root Cause**: Inclusion of unnecessary dependencies and development files
+
 **Resolution**: Implemented selective packaging with requirements.txt optimisation
+
 **Prevention**: Added .gitignore patterns and deployment scripts for consistent packaging
 
 ### SSL Certificate Validation Delays
 
 **Problem**: ACM certificate stuck in pending validation state
+
 **Root Cause**: Missing DNS validation records in Route 53
+
 **Resolution**: Automated CNAME record creation through Terraform ACM validation resources
+
 **Improvement**: Implemented certificate validation as part of infrastructure deployment
 
 ## Skills Demonstrated
 
 ### Cloud Architecture and Services
+
 - **AWS Lambda**: Serverless function development with Python runtime
 - **API Gateway**: RESTful API design with CORS and method configuration
 - **S3**: Static website hosting with bucket policies and lifecycle management
@@ -462,12 +495,14 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 - **ACM**: SSL certificate provisioning and validation automation
 
 ### Infrastructure as Code
+
 - **Terraform**: Multi-resource orchestration with state management
 - **Modular Configuration**: Reusable resource definitions and variable management
 - **Version Control**: Infrastructure versioning with Git integration
 - **Deployment Automation**: Consistent environment provisioning and updates
 
 ### Development and Debugging
+
 - **Python**: Lambda function development with boto3 SDK integration
 - **JavaScript**: Frontend API integration with error handling
 - **HTTP Protocol**: Deep understanding of CORS, preflight requests, and status codes
@@ -475,12 +510,14 @@ data "aws_iam_policy_document" "ctdc-cloudfront-oac" {
 - **CloudWatch**: Log analysis and performance monitoring
 
 ### Security and Best Practices
+
 - **IAM**: Managed policy implementation with security considerations documented
 - **HTTPS**: SSL/TLS configuration with certificate management
 - **Input Validation**: Form data sanitisation and validation logic
 - **Error Handling**: Graceful failure management and user feedback
 
 ### Problem-Solving and Iteration
+
 - **Architectural Evolution**: Systematic approach to identifying and resolving design limitations
 - **Root Cause Analysis**: Methodical debugging of complex multi-service issues
 - **Documentation**: Comprehensive recording of challenges and solutions for knowledge transfer
@@ -495,6 +532,7 @@ The final implementation represents a mature understanding of AWS service integr
 The live application at [https://www.connectingthedotscorp.com](https://www.connectingthedotscorp.com) serves as tangible proof of concept, processing real customer enquiries with enterprise-grade reliability and performance.
 
 **Key Repository Links:**
+
 - [Phase 1 Implementation](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/first-attempt-flask-web-app)
 - [Phase 2 Implementation](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/second-attempt-s3-web-app)
 - [Final Production Implementation](https://github.com/JThomas404/AWS-Automation-with-Python-Boto3-and-Lambda-Projects/tree/main/final-phase-s3-web-app)
