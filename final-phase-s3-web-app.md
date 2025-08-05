@@ -24,6 +24,7 @@ A production-ready serverless web application implementing cloud-native architec
 This implementation demonstrates a mature serverless architecture that cleanly separates frontend and backend concerns while leveraging AWS managed services for optimal scalability and reliability. The solution eliminates the architectural constraints identified in previous phases through strategic service selection and infrastructure as code practices.
 
 The architecture comprises three primary layers:
+
 1. **Presentation Layer**: Static HTML/CSS/JavaScript hosted on S3 with CloudFront CDN distribution
 2. **API Layer**: RESTful endpoints implemented via API Gateway with comprehensive CORS support
 3. **Business Logic Layer**: Python Lambda functions with structured logging and error handling
@@ -93,24 +94,28 @@ final-phase-s3-web-app/
 ## Tasks and Implementation Steps
 
 ### Phase 1: Infrastructure Foundation
+
 1. **Terraform Configuration**: Modular infrastructure design with reusable components
 2. **S3 Bucket Setup**: Static website hosting with proper security configurations
 3. **CloudFront Distribution**: Global CDN with SSL termination and custom domain
 4. **Route 53 Integration**: DNS management with health checks and failover
 
 ### Phase 2: API Layer Implementation
+
 1. **API Gateway Configuration**: RESTful endpoint design with comprehensive CORS support
 2. **Lambda Function Development**: Python-based business logic with structured error handling
-3. **DynamoDB Integration**: NoSQL data persistence with optimized partition key design
+3. **DynamoDB Integration**: NoSQL data persistence with optimised partition key design
 4. **IAM Security**: Least-privilege access policies and role-based permissions
 
 ### Phase 3: Frontend Development
+
 1. **Responsive Design**: Mobile-first CSS with cross-browser compatibility
 2. **JavaScript Integration**: Asynchronous API communication with error handling
 3. **Form Validation**: Client-side and server-side input validation
 4. **User Experience**: Loading states, success messages, and error feedback
 
 ### Phase 4: Testing and Deployment
+
 1. **Local Testing**: Lambda function validation with test events
 2. **Integration Testing**: End-to-end API testing with multiple content types
 3. **Performance Testing**: Load testing and CloudWatch monitoring
@@ -180,7 +185,7 @@ def handle_contact(event):
     try:
         dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table("ConnectingTheDots")
-        
+
         item = {
             "email": email,
             "first_name": first_name,
@@ -189,7 +194,7 @@ def handle_contact(event):
             "phone_number": body.get("phone_number"),
             "company": body.get("company")
         }
-        
+
         table.put_item(Item=item)
         logger.info("DynamoDB put_item succeeded for email: %s", email)
         return cors_response(200, {"message": "Contact data stored successfully"})
@@ -215,6 +220,7 @@ def cors_response(status_code, body, methods="POST,OPTIONS"):
 The Terraform configuration demonstrates enterprise-grade infrastructure management:
 
 **Lambda Function and IAM Configuration:**
+
 ```hcl
 data "aws_iam_policy_document" "ctdc-assume-role" {
   statement {
@@ -273,52 +279,55 @@ The static frontend implements form submission with error handling:
 
 ```javascript
 // Contact form submission from contact.html
-contactForm.addEventListener('submit', async function(event) {
+contactForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
-  const submitBtn = document.getElementById('submit-btn');
-  const responseDiv = document.getElementById('form-response');
-  responseDiv.textContent = '';
-  responseDiv.className = 'centered-text';
+  const submitBtn = document.getElementById("submit-btn");
+  const responseDiv = document.getElementById("form-response");
+  responseDiv.textContent = "";
+  responseDiv.className = "centered-text";
 
   const formData = new FormData(contactForm);
   const payload = {
-    first_name: formData.get('first_name'),
-    last_name: formData.get('last_name'),
-    email: formData.get('email'),
-    job_title: formData.get('job_title'),
-    phone_number: formData.get('phone_number'),
-    company: formData.get('company'),
-    message: formData.get('message')
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    email: formData.get("email"),
+    job_title: formData.get("job_title"),
+    phone_number: formData.get("phone_number"),
+    company: formData.get("company"),
+    message: formData.get("message"),
   };
 
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
+  submitBtn.textContent = "Submitting...";
 
   try {
-    const response = await fetch('https://uibbq0dvoh.execute-api.us-east-1.amazonaws.com/prod/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const response = await fetch(
+      "https://uibbq0dvoh.execute-api.us-east-1.amazonaws.com/prod/contact",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
 
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const result = await response.json();
-    console.log('Success:', result);
+    console.log("Success:", result);
 
-    responseDiv.textContent = '✅ Your message has been sent successfully!';
-    responseDiv.classList.add('success-message');
+    responseDiv.textContent = "✅ Your message has been sent successfully!";
+    responseDiv.classList.add("success-message");
 
     contactForm.reset();
   } catch (error) {
-    console.error('Error:', error);
-    responseDiv.textContent = '❌ Failed to submit form. Please try again.';
-    responseDiv.classList.add('error-message');
+    console.error("Error:", error);
+    responseDiv.textContent = "❌ Failed to submit form. Please try again.";
+    responseDiv.classList.add("error-message");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit';
-    responseDiv.scrollIntoView({ behavior: 'smooth' });
+    submitBtn.textContent = "Submit";
+    responseDiv.scrollIntoView({ behavior: "smooth" });
   }
 });
 ```
@@ -326,6 +335,7 @@ contactForm.addEventListener('submit', async function(event) {
 ## Local Testing and Debugging
 
 ### Lambda Function Testing
+
 Local development utilised comprehensive testing strategies:
 
 ```bash
@@ -349,6 +359,7 @@ EOF
 ```
 
 ### API Integration Testing
+
 Comprehensive endpoint validation using multiple tools:
 
 ```bash
@@ -370,6 +381,7 @@ curl -X POST https://API_ID.execute-api.us-east-1.amazonaws.com/prod/contact \
 ```
 
 ### Infrastructure Validation
+
 Terraform deployment verification and testing:
 
 ```bash
@@ -390,6 +402,7 @@ aws s3 ls | grep connectingthedots
 ```
 
 ### Production Testing Results
+
 End-to-end validation confirmed system functionality:
 
 ![Form Submission Success](images/form-submission-pt1.png)
@@ -446,16 +459,19 @@ resource "aws_iam_role_policy_attachment" "ctdc-lambda-dynamodb-access" {
 ### Architecture Pattern Selection
 
 **Serverless-First Approach:**
+
 - **Decision**: Implement fully serverless architecture using AWS managed services
 - **Rationale**: Eliminate infrastructure management overhead and enable automatic scaling
 - **Benefit**: 85% cost reduction compared to traditional server-based solutions
 
 **Static Site Generation:**
+
 - **Decision**: Decouple frontend from backend using static site hosting
 - **Rationale**: Improved performance, simplified deployment, and better caching
 - **Implementation**: S3 static hosting with CloudFront global distribution
 
 **API-First Design:**
+
 - **Decision**: RESTful API design with comprehensive CORS support
 - **Rationale**: Enable future mobile applications and third-party integrations
 - **Benefit**: Flexible client development and independent scaling
@@ -463,30 +479,35 @@ resource "aws_iam_role_policy_attachment" "ctdc-lambda-dynamodb-access" {
 ### Technology Stack Choices
 
 **Python 3.11 Lambda Runtime:**
+
 - **Decision**: Latest Python runtime for Lambda functions
 - **Rationale**: Improved performance, security updates, and modern language features
 - **Trade-off**: Requires careful dependency management for compatibility
 
 **Terraform over CloudFormation:**
+
 - **Decision**: HashiCorp Terraform for infrastructure provisioning
 - **Rationale**: Superior state management, multi-cloud compatibility, and extensive provider ecosystem
 - **Benefit**: Declarative configuration with plan/apply workflow for change validation
 
 **DynamoDB Single-Table Design:**
-- **Decision**: NoSQL database with optimized partition key strategy
+
+- **Decision**: NoSQL database with optimised partition key strategy
 - **Rationale**: Serverless scaling, pay-per-request pricing, and simplified schema management
 - **Implementation**: Email as partition key for efficient contact data retrieval
 
 ### Security Implementation
 
 **HTTPS Enforcement:**
+
 - CloudFront configured to redirect HTTP to HTTPS automatically
 - ACM certificate with automatic renewal and domain validation
 - HSTS headers implemented for enhanced browser security
 
 **Input Validation:**
+
 - Comprehensive server-side validation for all form inputs
-- SQL injection prevention through parameterized DynamoDB operations
+- SQL injection prevention through parameterised DynamoDB operations
 - XSS protection through proper output encoding
 
 ## Errors Encountered and Resolved
@@ -515,21 +536,24 @@ resource "aws_iam_role_policy_attachment" "ctdc-lambda-dynamodb-access" {
 ## Skills Demonstrated
 
 ### Cloud Architecture and Services
+
 - **AWS Lambda**: Serverless function development with Python 3.11 runtime
 - **API Gateway**: RESTful API design with comprehensive CORS and method configuration
 - **S3**: Static website hosting with bucket policies and lifecycle management
 - **CloudFront**: Global CDN configuration with custom domains and SSL termination
-- **DynamoDB**: NoSQL database design with optimized partition key strategies
+- **DynamoDB**: NoSQL database design with optimised partition key strategies
 - **Route 53**: DNS management with health checks and failover configuration
 - **ACM**: SSL certificate provisioning with automatic renewal
 
 ### Infrastructure as Code
+
 - **Terraform**: Multi-resource orchestration with modular configuration design
 - **State Management**: Remote state storage with locking and versioning
 - **Variable Management**: Environment-specific configuration with validation
 - **Resource Dependencies**: Proper dependency management and deployment ordering
 
 ### Development and Testing
+
 - **Python**: Lambda function development with structured logging and error handling
 - **JavaScript**: Modern frontend development with async/await patterns
 - **HTTP Protocol**: Deep understanding of CORS, content types, and status codes
@@ -537,15 +561,17 @@ resource "aws_iam_role_policy_attachment" "ctdc-lambda-dynamodb-access" {
 - **Debugging**: Systematic troubleshooting using CloudWatch logs and AWS CLI
 
 ### Security and Best Practices
+
 - **IAM**: Managed policy implementation with security considerations documented
 - **HTTPS**: SSL/TLS configuration with certificate management
 - **Input Validation**: Comprehensive data sanitisation and validation logic
 - **Error Handling**: Graceful failure management with structured logging
 
 ### Problem-Solving and Architecture
+
 - **System Design**: Scalable architecture patterns for serverless applications
-- **Performance Optimization**: CDN configuration and caching strategies
-- **Cost Optimization**: Serverless pricing models and resource efficiency
+- **Performance Optimisation**: CDN configuration and caching strategies
+- **Cost Optimisation**: Serverless pricing models and resource efficiency
 - **Operational Excellence**: Monitoring, logging, and deployment automation
 
 ## Conclusion
@@ -555,8 +581,9 @@ This production implementation represents the successful culmination of iterativ
 The final architecture delivers enterprise-grade reliability through AWS managed services while maintaining cost efficiency and development velocity. The comprehensive infrastructure as code implementation ensures reproducible deployments and enables rapid iteration for future enhancements.
 
 Key architectural achievements include:
+
 - **Zero-downtime deployments** through blue-green deployment strategies
-- **Global performance** via CloudFront edge locations and optimized caching
+- **Global performance** via CloudFront edge locations and optimised caching
 - **Cost efficiency** with serverless compute and pay-per-request pricing models
 - **Security compliance** through HTTPS enforcement and least-privilege access controls
 - **Operational visibility** via structured logging and CloudWatch monitoring
@@ -564,6 +591,7 @@ Key architectural achievements include:
 The live application at [https://www.connectingthedotscorp.com](https://www.connectingthedotscorp.com) serves as tangible proof of production-ready serverless architecture, processing real customer enquiries with enterprise-grade reliability and performance.
 
 **Key Repository Links:**
+
 - [Lambda Function Source](final-phase-s3-web-app/backend/)
 - [Terraform Infrastructure](final-phase-s3-web-app/terraform/)
 - [Frontend Assets](final-phase-s3-web-app/frontend/)

@@ -342,7 +342,7 @@ Browser-based testing confirmed form submission workflow and error handling:
 
 - **Virtual Environments**: Dependency isolation and version management
 - **Error Handling**: Exception management and user feedback
-- **Code Organization**: Modular application structure with separation of concerns
+- **Code Organisation**: Modular application structure with separation of concerns
 - **Testing Strategy**: Manual validation and console verification procedures
 
 ### Problem-Solving and Architecture
